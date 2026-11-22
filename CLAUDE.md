@@ -34,9 +34,9 @@ Every comic covers WHAT, WHY and SO WHAT, has one idea only, and every row of it
 3. [ ] Test SKILL.md by pasting it into ChatGPT and Gemini; note any differences and tighten the wording
 4. [ ] Record demo GIF for README
 5. [ ] Add Build with me link + Instagram link in README
-6. [ ] `git init`, first commit, create public GitHub repo `concept-to-comics`, push
+6. [x] `git init`, first commit, create public GitHub repo `concept-to-comics`, push
 7. [x] Build the free comic viewer (`viewer/index.html`) and point SKILL.md + README to it
-8. [ ] After push: turn on GitHub Pages (main branch, root) and check the viewer URL works
+8. [x] After push: turn on GitHub Pages (main branch, root) and check the viewer URL works
 
 ## Style
 - README: simple English, emojis OK, short sections, non-tech people should understand it.
