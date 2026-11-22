@@ -451,7 +451,7 @@ function parseThing(tok) {
 function thingsSVG(list, x0, w, bottom, maxH) {
   const items = list.map(parseThing);
   const blocks = [];
-  const signFs = Math.min(...items.filter(i => i.kind === "sign").map(i => clamp(w / Math.max(6, textW(i.text.split(/\s\/\s/).sort((a, b) => b.length - a.length)[0], 1) + 1.6), 22, 46)), 46);
+  const signFs = Math.min(...items.filter(i => i.kind === "sign").map(i => clamp(Math.min(w * 1.5, 760) / Math.max(6, textW(i.text.split(/\s\/\s/).sort((a, b) => b.length - a.length)[0], 1) + 1.6), 28, 50)), 50);
   for (const it of items) {
     if (it.kind === "sign") {
       const fs = signFs;
@@ -649,14 +649,14 @@ function layoutPanel(c, p, sec, slots, charSlots, hasBoard, hasThings) {
     const by = Math.max(topY + 10, 170), bh = Math.min(feet - by - 40, 600);
     svg = svg.replace(/<rect x="250" y="150"[^>]*\/>/, "") + boardSVG(p.board, 40, by, 670, bh);
   }
-  for (const sl of slots) {
-    if (sl.type === "things") svg += thingsSVG(p.things, sl.x, sl.w, feet - 8, feet - headTop + 40);
-  }
   for (const sl of charSlots) {
     const { ch, expr, pose, item, mirror } = sl.s;
     const sc = base * (ch.adult ? 1.12 : 1);
     const x = sl.cx - 100 * sc, y = feet - 392 * sc;
     svg += `<g transform="translate(${x.toFixed(1)},${y.toFixed(1)}) scale(${sc.toFixed(3)})">${personSVG(ch, expr, pose, item, mirror)}</g>`;
+  }
+  for (const sl of slots) {
+    if (sl.type === "things") svg += thingsSVG(p.things, sl.x, sl.w, feet - 8, feet - headTop + 40);
   }
   const el = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   el.setAttribute("viewBox", "0 0 1080 1080"); el.setAttribute("aria-hidden", "true");
