@@ -1,7 +1,8 @@
 # CLAUDE.md: Concept to Comics repo
 
 ## What this repo is
-A model-agnostic skill that turns any concept into a 3-5 panel kid-level comic using analogies from the reader's own culture. It is SK's "Weekend Project #1": free, open source, built to grow an audience for the weekly weekend-project series and the paid "Build your first app with AI" sessions.
+A model-agnostic skill that turns any concept into a 3-5 panel kid-level comic using analogies from the reader's own culture. It is SK's first public AI project: free, open source, built to grow an audience for future projects (shared from time to time, no fixed schedule) and the paid "Build your first app with AI" sessions.
+- Public wording: never promise a cadence ("every weekend", "weekly"). Use "watch this space" / "more projects from time to time".
 
 ## The product is SKILL.md
 - `SKILL.md` is the single source of truth. It must work BOTH as an Agent Skill AND when pasted as the first message into ChatGPT/Gemini.

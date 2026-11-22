@@ -12,7 +12,7 @@ Ask "What is a JVM?", "What is inflation?" or "How do plants make food?" and get
 
 ![Demo: paste a script into the Comic Viewer and get a comic](assets/demo.gif)
 
-> 🗓️ **Weekend Project #1** by [@techie_sasikumar](https://instagram.com/techie_sasikumar). A new AI build every weekend. Follow along!
+> 👀 **Watch this space!** Built by [@techie_sasikumar](https://instagram.com/techie_sasikumar). More free AI projects are coming from time to time, and you might find your next idea in one of them.
 
 ---
 
@@ -142,6 +142,6 @@ MIT. Use it, remix it, teach with it.
 
 ---
 
-Made with ❤️ as Weekend Project #1 by [@techie_sasikumar](https://instagram.com/techie_sasikumar).
+Made with ❤️ by [@techie_sasikumar](https://instagram.com/techie_sasikumar). More projects coming from time to time: watch this space!
 
 🚀 **Build your first app with AI** (live session) - coming soon! DM 'BUILD' on Instagram [@techie_sasikumar](https://instagram.com/techie_sasikumar) to join the waitlist.
