@@ -74,7 +74,7 @@ Kavin: "Kaasa summa vechaa, adhoda power mella mella urugum!"
 | Last year → this year | Inflation happens over time, not in one day |
 | Last year's ₹10 can't buy a mango now | Savings lose buying power |
 
-Where it breaks: Real inflation has many causes (higher costs, fuel prices, supply problems), not only extra money. And real prices rarely move exactly in step with money. The neat ₹10 → ₹20 just makes the idea easy to see.
+Where it breaks: Real inflation has many causes (higher costs, fuel prices, supply problems), not only extra money. And real prices rarely move exactly in step with money. In India prices usually rise about 4-6% a year, not double; the ₹10 → ₹20 jump just makes the idea easy to see.
 ```
 
 ## Image prompts

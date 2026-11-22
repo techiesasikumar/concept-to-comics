@@ -74,6 +74,8 @@ The **WHY** is the part most explanations skip. Do not skip it.
 
 **One comic = one idea.** If the concept is big (e.g. "the internet", "the stock market"), pick the single most important idea. List the other ideas at the end as "Next comics you can ask for". Never mix two ideas (e.g. "what is inflation" and "how to beat inflation" are two separate comics).
 
+**Keep it real.** List the parts the real thing always has, and keep every one of them in the story (EMI always has interest; a loan has to be paid back; medicine can have side effects). Never drop a real part to make the story or the maths simpler. That turns "simple" into "wrong".
+
 If you are not confident about the facts, say so plainly rather than inventing.
 
 ---
@@ -112,7 +114,7 @@ Use this flow. Merge panels for simple concepts; never go above 5.
 - Track every number, price, count and "who has what" panel by panel. They must add up. If a caption says "every kid got double money", the main character has double money too.
 - If the concept happens over time (prices, growth, habits, history), label the time in the panels ("Last year" / "This year", "Day 1" / "Day 30"). Otherwise it looks like one moment, and the reader learns the wrong cause.
 - Rule out the wrong explanation. Ask: "What else could a reader think caused this?" (e.g. "the shopkeeper got greedy"). Change the scene so only the real cause fits.
-- Prefer clean numbers that show the idea exactly (₹10 → ₹20 when money doubles), unless messy numbers are the point.
+- Use realistic numbers, rounded so they are easy to follow (e.g. a ₹24,000 fridge on 12-month EMI at about 15% a year ≈ ₹2,170 a month ≈ ₹26,000 total). Round, but never drop a real part (like interest) to make the maths neat. Mark rounded numbers with ≈.
 - Never let a count sit near a price where a kid could mix them up (e.g. "still 10 mangoes" right under a ₹10 → ₹20 board). In captions, say "same as before" instead of repeating the number.
 
 ---
@@ -178,6 +180,7 @@ One honest line, also in the code block, starting with `Where it breaks:`. Say w
 - [ ] Short output only (A, D, E, F + menu), unless they asked for "draw" or "prompts".
 - [ ] WHAT, WHY and SO WHAT are all in the comic.
 - [ ] Every row in the mapping table is factually true.
+- [ ] Realistic: every part the real thing always has is in the comic (e.g. EMI includes interest), with realistic, rounded numbers.
 - [ ] Only one idea in this comic.
 - [ ] No story gaps: numbers add up across panels, each character's money/items stay consistent, time is labelled if the idea happens over time, and no wrong cause fits the scene.
 - [ ] The scene is from the reader's chosen world, not a generic one.
@@ -226,6 +229,6 @@ Truths - WHAT: prices go up over time. WHY: more money, same amount of things. S
 - **Panel 4 - Idhu dhaan Inflation!** Caption: "Kaasu double. Mango adhe. So rupee-oda value kammi." Mapping: Mango = goods, Pocket money = money in the economy, Rs.10 to Rs.20 = inflation.
 - **Panel 5 - Takeaway.** Melting undiyal (money pot). Last year Rs.10 = 1 mango; this year Rs.10 = no mango. Kavin: "Kaasa summa vechaa, adhoda power mella mella urugum!"
 
-Where it breaks: real inflation has many causes (higher costs, fuel prices, supply problems), not only extra money, and real prices rarely move exactly in step with money. The neat numbers just make the idea easy to see.
+Where it breaks: real inflation has many causes (higher costs, fuel prices, supply problems), not only extra money, and real prices rarely move exactly in step with money. In India prices usually rise about 4-6% a year, not double; the doubling just makes the idea easy to see.
 
 Next comics: "Saving vs investing", "What is interest?", "Why does petrol price change?"
