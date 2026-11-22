@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Concept to Comics · Viewer</title>
+<meta name="description" content="Paste the comic script your AI wrote with the Concept to Comics skill, and see it drawn as a comic. Free, no login.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#1a1a1a; --paper:#fffaf0; --yellow:#ffe14d; --red:#e63946; --blue:#2f7de1; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--paper);
+    background-image: radial-gradient(#e8dcc4 1.2px, transparent 1.2px); background-size: 14px 14px;
+    font-family: "Comic Neue", "Comic Sans MS", cursive, sans-serif; font-weight: 700; color: var(--ink);
+  }
+  header.bar {
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between;
+    max-width: 1320px; margin: 0 auto; padding: 18px 20px 0;
+  }
+  .logo { font-family: "Bangers", cursive; font-weight: 400; font-size: 34px; letter-spacing: .03em; }
+  .logo span { color: var(--red); }
+  .btns { display: flex; flex-wrap: wrap; gap: 8px; }
+  button {
+    font: inherit; font-size: 16px; cursor: pointer; color: var(--ink);
+    background: #fff; border: 3px solid var(--ink); border-radius: 10px; padding: 8px 14px;
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+  button.primary { background: var(--yellow); }
+  button:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--ink); }
+  #editor { max-width: 1320px; margin: 14px auto 0; padding: 0 20px; }
+  #editor p { margin: 6px 0 10px; font-weight: 400; font-size: 17px; }
+  textarea {
+    width: 100%; min-height: 260px; font: 15px/1.45 ui-monospace, Consolas, monospace;
+    border: 3px solid var(--ink); border-radius: 12px; padding: 12px; background: #fff; resize: vertical;
+  }
+  #msg { min-height: 24px; margin-top: 8px; color: #b5212d; }
+  .comic {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 28px; max-width: 1320px; margin: 0 auto; padding: 24px 20px 8px;
+  }
+  .panel {
+    position: relative; aspect-ratio: 1 / 1; border: 6px solid var(--ink); background: #fff;
+    overflow: hidden; container-type: inline-size; box-shadow: 8px 8px 0 var(--ink);
+  }
+  .panel > svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .tag {
+    position: absolute; top: 3cqw; left: 3cqw; z-index: 2; background: var(--ink); color: #fff;
+    font-size: 3.6cqw; line-height: 1.1; padding: 1.4cqw 2.4cqw; border-radius: 2cqw; max-width: 60%;
+  }
+  .when {
+    position: absolute; top: 3cqw; left: 3cqw; z-index: 2; color: #fff;
+    border: .6cqw solid var(--ink); box-shadow: .8cqw .8cqw 0 var(--ink);
+    padding: 1.2cqw 2.6cqw 1.4cqw; transform: rotate(-2deg); line-height: 1; max-width: 62%;
+  }
+  .when b { display: block; font-family: "Bangers", cursive; font-weight: 400; font-size: 4.6cqw; letter-spacing: .04em; }
+  .when small { display: block; font-size: 3.2cqw; margin-top: .6cqw; }
+  .caption {
+    position: absolute; z-index: 2; left: 4%; right: 4%; bottom: 3.5%; background: var(--yellow);
+    border: .6cqw solid var(--ink); box-shadow: .9cqw .9cqw 0 var(--ink); padding: 2cqw 3cqw;
+    font-size: 4.4cqw; line-height: 1.22;
+  }
+  .bubble, .think {
+    position: absolute; z-index: 3; background: #fff; border: .6cqw solid var(--ink);
+    padding: 2.2cqw 3.4cqw; font-size: 4.6cqw; line-height: 1.2; text-align: center;
+  }
+  .bubble { border-radius: 7cqw; }
+  .bubble::before, .bubble::after { content: ""; position: absolute; top: 100%; left: var(--tail, 50%); width: 6cqw; height: 7cqw; }
+  .bubble::before { background: var(--ink); clip-path: polygon(0 0, 100% 0, var(--tip, 50%) 100%); }
+  .bubble::after  { background: #fff; clip-path: polygon(.9cqw 0, calc(100% - .9cqw) 0, var(--tip, 50%) calc(100% - 1.5cqw)); }
+  .think { border-radius: 9cqw; }
+  .think::before, .think::after { content: ""; position: absolute; background: #fff; border: .6cqw solid var(--ink); border-radius: 50%; }
+  .think::before { width: 4.2cqw; height: 4.2cqw; left: var(--tail, 50%); top: calc(100% + 1cqw); }
+  .think::after  { width: 2.6cqw; height: 2.6cqw; left: calc(var(--tail, 50%) + var(--dir, 1) * 3.6cqw); top: calc(100% + 6cqw); }
+  .who { display: block; font-size: 3cqw; color: #666; margin-bottom: .4cqw; }
+  .title-card h1 {
+    position: absolute; top: 13cqw; left: 3%; right: 3%; margin: 0; text-align: center;
+    font-family: "Bangers", cursive; font-weight: 400; letter-spacing: .03em; line-height: 1;
+    color: var(--red); -webkit-text-stroke: .45cqw var(--ink); text-shadow: 1.1cqw 1.1cqw 0 var(--ink);
+  }
+  .title-card .kicker {
+    position: absolute; top: 4.5cqw; left: 50%; transform: translateX(-50%) rotate(-2deg);
+    background: var(--ink); color: var(--yellow); font-size: 3.6cqw; padding: 1.3cqw 3cqw; white-space: nowrap;
+  }
+  .title-card .sub {
+    position: absolute; left: 8%; right: 8%; transform: rotate(1deg); text-align: center;
+    background: #fff; border: .6cqw solid var(--ink); box-shadow: .9cqw .9cqw 0 var(--ink);
+    font-size: 4.8cqw; padding: 1.6cqw 3cqw;
+  }
+  .title-card .setup {
+    position: absolute; left: 50%; transform: translateX(-50%); font-size: 3.3cqw; white-space: nowrap;
+    background: rgba(255,255,255,.88); padding: .8cqw 2.4cqw; border-radius: 3cqw;
+  }
+  .sheet { background: #fff; }
+  .sheet .in { position: absolute; inset: 0; padding: 5cqw 5cqw 4cqw; display: flex; flex-direction: column; }
+  .sheet h2 { font-family: "Bangers", cursive; font-weight: 400; letter-spacing: .03em; font-size: 7.5cqw; margin: 0 0 2cqw; }
+  .sheet table { border-collapse: collapse; width: 100%; font-size: 4.2cqw; }
+  .sheet td { border: .4cqw solid var(--ink); padding: 1.3cqw 1.8cqw; vertical-align: top; }
+  .sheet td:first-child { background: #fff6c2; width: 46%; }
+  .sheet .breaks { margin-top: auto; font-size: 3.8cqw; background: #ffe3e3; border: .4cqw solid var(--ink); padding: 1.6cqw 2.2cqw; }
+  .sheet .breaks b { color: var(--red); }
+  footer { text-align: center; padding: 26px 16px 40px; font-size: 18px; }
+  footer span { background: var(--ink); color: var(--yellow); padding: 6px 14px; border-radius: 20px; }
+  footer a { color: inherit; }
+  .arm-o { fill: none; stroke: var(--ink); stroke-width: 22; stroke-linecap: round; stroke-linejoin: round; }
+  .arm-i { fill: none; stroke-width: 12; stroke-linecap: round; stroke-linejoin: round; }
+  .t { font-family: "Comic Neue", "Comic Sans MS", cursive, sans-serif; font-weight: 700; }
+  .emo { font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif; }
+  .hidden { display: none !important; }
+  @media print {
+    header.bar, #editor { display: none !important; }
+    body { background: #fff; }
+    .comic { display: block; }
+    .panel { width: 100%; max-width: 640px; margin: 0 auto 24px; break-inside: avoid; box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="logo">Concept to <span>Comics</span> · Viewer</div>
+  <div class="btns">
+    <button id="btnEdit" class="hidden">✏️ Edit script</button>
+    <button id="btnShare">🔗 Copy share link</button>
+    <button id="btnPrint">🖨️ Print / PDF</button>
+  </div>
+</header>
+
+<section id="editor">
+  <p>Paste the comic script your AI wrote (with the <b>Concept to Comics</b> skill) and press <b>Draw my comic</b>. Everything stays in your browser.</p>
+  <textarea id="src" spellcheck="false" placeholder="COMIC: ...&#10;PANEL 1 - ...&#10;Place: ...&#10;Show: ...&#10;..."></textarea>
+  <div class="btns" style="margin-top:10px">
+    <button id="btnDraw" class="primary">🎨 Draw my comic</button>
+    <button id="btnExample">👀 Load an example</button>
+  </div>
+  <div id="msg"></div>
+</section>
+
+<main id="comic" class="comic"></main>
+<footer><span>Made with <a href="https://github.com/techiesasikumar/concept-to-comics">Concept to Comics</a></span></footer>
+
+<script>
+"use strict";
+const EXAMPLE = `COMIC: Inflation
+Subtitle: Kavin & the mango stall
+For: Kids 10-12 · Tamil Nadu · Tanglish
+Characters: Kavin = boy, 10, blue shirt, brown skin | Seller = man, orange shirt, white veshti, moustache, brown skin
+
+PANEL 1 - Thiruvizha
+Label: Pona varusham (Last year)
+Place: temple festival
+Show: Seller happy holding ₹10, Kavin happy holding 🥭
+Things: 🥭 x9, sign "Mango ₹10"
+Kavin: "Superb! ₹10-ku oru mango!"
+
+PANEL 2 - Double pocket money!
+Label: Indha varusham (This year)
+Place: temple festival
+Show: Kavin happy holding ₹20
+Kavin (thinks): "Indha thadava 2 mango! 🥭🥭"
+Caption: Ellaa pasangalukkum DOUBLE pocket money: ₹20!
+
+PANEL 3 - Price yeruthu
+Label: Indha varusham (This year)
+Place: temple festival
+Show: Seller happy, Kavin shocked holding ₹20
+Things: 🥭 x10, sign "Mango ~~₹10~~ ₹20"
+Kavin: "Aiyo! ₹20-ku oru mango dhaan!"
+Caption: Kaasu double aachu. Aana mango pona varusham alavu dhaan!
+
+PANEL 4 - Idhu dhaan Inflation!
+Place: classroom
+Show: Kavin proud pointing
+Board: 🥭 Mango = Goods | 💵 Pocket money = Money in the economy | Mango price ₹10 → ₹20 = Inflation!
+Caption: Kaasu double. Mango adhe. So rupee-oda value kammi.
+
+PANEL 5 - Takeaway
+Place: home
+Show: Kavin worried holding 🏺
+Things: sign "Last year: ₹10 = 🥭", sign "Now: ₹10 = ❌"
+Kavin: "Kaasa summa vechaa, adhoda power mella mella urugum!"
+
+| In the comic | In real life |
+|---|---|
+| Same number of mangoes every year | Goods and services in the country |
+| Every kid gets double pocket money | More money in people's hands |
+| Mango price ₹10 → ₹20 | Inflation (prices rise) |
+| Last year → this year | Inflation happens over time |
+| Last year's ₹10 can't buy a mango now | Savings lose buying power |
+
+Where it breaks: Real inflation has many causes (costs, fuel, supply), not only extra money, and prices rarely move exactly in step with money.`;
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const hash = s => { let h = 7; for (const ch of s) h = (h * 31 + ch.codePointAt(0)) >>> 0; return h; };
+const hasEmoji = s => /\p{Extended_Pictographic}/u.test(s);
+const INK = "#1a1a1a";
+
+/* ---------- parsing ---------- */
+function splitTop(s, sep) {
+  const out = []; let cur = "", q = false;
+  for (const ch of s) {
+    if (ch === '"' || ch === "“" || ch === "”") q = !q;
+    if (ch === sep && !q) { out.push(cur.trim()); cur = ""; } else cur += ch;
+  }
+  if (cur.trim()) out.push(cur.trim());
+  return out;
+}
+const KEYS = ["comic", "title", "subtitle", "for", "setup", "characters", "cast", "place", "show", "things", "label", "when", "board", "caption", "scene", "where it breaks", "breaks"];
+
+function parse(text) {
+  const c = { title: "", subtitle: "", setup: "", chars: [], panels: [], map: [], breaks: "" };
+  let p = null, inBreaks = false;
+  const lines = text.replace(/\r/g, "").split("\n");
+  for (let raw of lines) {
+    let line = raw.replace(/^```.*$/, "").replace(/\*\*/g, "").replace(/^\s*(?:[-*•]|#{1,6})\s+/, "").trim();
+    if (!line) continue;
+    if (/^\|/.test(line)) {
+      const cells = line.split("|").slice(1, -1).map(x => x.trim());
+      if (cells.length >= 2 && !/^:?-{2,}/.test(cells[0]) && !/^in the comic$/i.test(cells[0])) c.map.push([cells[0], cells[1]]);
+      continue;
+    }
+    if (/^where (this|the)? ?analogy breaks/i.test(line) && !line.includes(":")) { inBreaks = true; continue; }
+    if (inBreaks && !/^[a-z ]+:/i.test(line)) { c.breaks += (c.breaks ? " " : "") + line; continue; }
+    inBreaks = false;
+    let m = line.match(/^panel\s*(\d+)\s*[-–—:·.]?\s*(.*)$/i);
+    if (m) { p = { n: +m[1], title: m[2].trim(), show: [], things: [], board: [], speech: [], caption: "", label: "", place: "", scene: "" }; c.panels.push(p); continue; }
+    m = line.match(/^([^:"]{1,40}?)\s*(\((thinks|thinking|thought)\))?\s*:\s*(.*)$/i);
+    if (!m) continue;
+    const key = m[1].trim(), lk = key.toLowerCase(), val = m[4].trim(), think = !!m[2];
+    const unq = val.replace(/^["“]|["”]$/g, "");
+    if (!p) {
+      if (lk === "comic" || lk === "title") c.title = unq;
+      else if (lk === "subtitle") c.subtitle = unq;
+      else if (lk === "for" || lk === "setup") c.setup = unq;
+      else if (lk === "characters" || lk === "cast") splitTop(val, "|").forEach(d => addChar(c, d));
+      else if (lk === "where it breaks" || lk === "breaks") c.breaks = unq;
+      else if (/=/.test(val) && !KEYS.includes(lk)) addChar(c, key + " = " + val.split("=").pop());
+      continue;
+    }
+    if (lk === "place") p.place = val;
+    else if (lk === "scene") p.scene = val;
+    else if (lk === "show") p.show = splitTop(val, ",");
+    else if (lk === "things") p.things = splitTop(val, ",");
+    else if (lk === "label" || lk === "when") p.label = unq;
+    else if (lk === "board") p.board = val.split("|").map(x => x.trim()).filter(Boolean);
+    else if (lk === "caption") p.caption = unq;
+    else if (lk === "where it breaks" || lk === "breaks") c.breaks = unq;
+    else if (!KEYS.includes(lk)) p.speech.push({ who: key, text: unq, think });
+  }
+  return c;
+}
+
+function addChar(c, def) {
+  const [nameRaw, specRaw = ""] = def.split("=");
+  const name = nameRaw.trim(); if (!name) return;
+  const s = specRaw.toLowerCase();
+  let type = /grand ?ma|granny|grandmother|paati|patti|nani|dadi|ammamma|aaji/.test(s) ? "grandma"
+    : /grand ?pa|grandfather|thatha|dada|nana|tatha|ajoba/.test(s) ? "grandpa"
+    : /\bgirl\b/.test(s) ? "girl" : /\bboy\b/.test(s) ? "boy"
+    : /\bwoman\b|\blady\b|\bmother\b|\bmom\b|\bamma\b|\bmum\b|\baunt/.test(s) ? "woman"
+    : /\bman\b|\bfather\b|\bdad\b|\bappa\b|\buncle\b|\bseller\b|\bshopkeeper\b/.test(s) ? "man" : "";
+  if (!type) { const k = hash(name) % 4; type = ["boy", "girl", "man", "woman"][k]; }
+  const COLORS = { red: "#e63946", blue: "#2f7de1", green: "#52b788", yellow: "#ffd23f", orange: "#f4a259", purple: "#8e5bd6", violet: "#8e5bd6", pink: "#f15bb5", white: "#f7f7f7", black: "#333", brown: "#8b5a2b", grey: "#9aa0a6", gray: "#9aa0a6", maroon: "#8b1e3f", teal: "#2a9d8f", navy: "#1d3557", khaki: "#c9a96e", cream: "#f3e3c3" };
+  const colorWords = [...s.matchAll(/\b(red|blue|green|yellow|orange|purple|violet|pink|white|black|brown|grey|gray|maroon|teal|navy|khaki|cream)\b(?!\s*(skin|hair))/g)].map(m => COLORS[m[1]]);
+  const skinM = s.match(/\b(light|fair|pale|medium|olive|tan|brown|dark|wheat)\b[\w\s-]*?skin/);
+  const SKIN = { light: "#f1c27d", fair: "#f1c27d", pale: "#f6d3b3", medium: "#c68642", olive: "#c68642", tan: "#c68642", wheat: "#d9a066", brown: "#a8693f", dark: "#7a4a2a" };
+  const skin = skinM ? SKIN[skinM[1]] : ["#a8693f", "#c68642", "#f1c27d", "#7a4a2a"][hash(name + "s") % 4];
+  const hairM = s.match(/\b(black|brown|blonde|blond|red|grey|gray|white|silver)\s+hair/);
+  const HAIR = { black: "#1a1a1a", brown: "#6b3e1f", blonde: "#e9c46a", blond: "#e9c46a", red: "#b5482b", grey: "#b9b9b9", gray: "#b9b9b9", white: "#e8e8e8", silver: "#cfcfcf" };
+  const elder = type === "grandma" || type === "grandpa";
+  const style = /\bpuff/.test(s) ? "puff" : /\bbun\b/.test(s) ? "bun" : /plait|braid|pigtail/.test(s) ? "plaits" : /ponytail/.test(s) ? "ponytail"
+    : /long hair/.test(s) ? "long" : /curly/.test(s) ? "curly" : /\bbald/.test(s) ? "bald"
+    : type === "girl" ? "plaits" : type === "woman" ? "bun" : type === "grandma" ? "bun" : type === "grandpa" ? "bald" : "short";
+  c.chars.push({
+    name, type, skin,
+    shirt: colorWords[0] || ["#2f7de1", "#e63946", "#52b788", "#f4a259", "#8e5bd6", "#f15bb5"][hash(name) % 6],
+    lower: colorWords[1] || "",
+    hair: hairM ? HAIR[hairM[1]] : elder ? "#cfcfcf" : "#1a1a1a",
+    style,
+    saree: /saree|sari\b/.test(s) || (type === "grandma" && !/dress|pants|jeans/.test(s)),
+    veshti: /veshti|dhoti|lungi|mundu/.test(s),
+    moustache: /moustache|mustache|mooch/.test(s), beard: /beard/.test(s), glasses: /glasses|specs|spectacles/.test(s) || (elder && !/no glasses/.test(s)),
+    bindi: /bindi|pottu/.test(s), hijab: /hijab|headscarf/.test(s), cap: /\bcap\b|\bhat\b/.test(s),
+    adult: !(type === "boy" || type === "girl")
+  });
+}
+
+function findChar(c, name) {
+  const n = name.toLowerCase();
+  return c.chars.find(x => x.name.toLowerCase() === n) || c.chars.find(x => n.startsWith(x.name.toLowerCase()) || x.name.toLowerCase().startsWith(n));
+}
+function ensureChar(c, name) {
+  let ch = findChar(c, name);
+  if (!ch) { addChar(c, name + " = "); ch = c.chars[c.chars.length - 1]; }
+  return ch;
+}
+
+/* ---------- drawing: people ---------- */
+const FACES = {
+  happy: `<ellipse cx="80" cy="92" rx="9" ry="12" fill="#fff" stroke="${INK}" stroke-width="4"/><ellipse cx="120" cy="92" rx="9" ry="12" fill="#fff" stroke="${INK}" stroke-width="4"/><circle cx="82" cy="95" r="5" fill="${INK}"/><circle cx="122" cy="95" r="5" fill="${INK}"/><circle cx="65" cy="117" r="8" fill="#ff7b7b" opacity=".5"/><circle cx="135" cy="117" r="8" fill="#ff7b7b" opacity=".5"/><path d="M80 116 Q100 142 120 116 Z" fill="#7a1f1f" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/>`,
+  shocked: `<path d="M66 66 Q78 56 90 64 M110 64 Q122 56 134 66" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round"/><circle cx="80" cy="93" r="14" fill="#fff" stroke="${INK}" stroke-width="4"/><circle cx="120" cy="93" r="14" fill="#fff" stroke="${INK}" stroke-width="4"/><circle cx="80" cy="94" r="4" fill="${INK}"/><circle cx="120" cy="94" r="4" fill="${INK}"/><ellipse cx="100" cy="128" rx="11" ry="15" fill="#7a1f1f" stroke="${INK}" stroke-width="4"/>`,
+  proud: `<path d="M64 70 Q78 62 92 70 M108 70 Q122 62 136 70" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round"/><path d="M70 96 Q80 84 90 96 M110 96 Q120 84 130 96" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round"/><circle cx="65" cy="114" r="8" fill="#ff7b7b" opacity=".5"/><circle cx="135" cy="114" r="8" fill="#ff7b7b" opacity=".5"/><path d="M76 112 Q100 146 124 112 Z" fill="#7a1f1f" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/><path d="M82 114 H118" stroke="#fff" stroke-width="5"/>`,
+  worried: `<path d="M66 64 Q78 70 90 66 M110 66 Q122 70 134 64" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round"/><circle cx="80" cy="92" r="13" fill="#fff" stroke="${INK}" stroke-width="4"/><circle cx="120" cy="92" r="13" fill="#fff" stroke="${INK}" stroke-width="4"/><circle cx="80" cy="97" r="5" fill="${INK}"/><circle cx="120" cy="97" r="5" fill="${INK}"/><path d="M80 128 Q87 120 94 128 Q100 136 106 128 Q113 120 120 128" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round"/><path d="M166 40 Q178 58 172 66 Q164 72 158 64 Q156 54 166 40 Z" fill="#8fd6ff" stroke="${INK}" stroke-width="3"/>`,
+  sad: `<path d="M66 70 Q78 64 90 72 M110 72 Q122 64 134 70" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round"/><ellipse cx="80" cy="95" rx="8" ry="10" fill="#fff" stroke="${INK}" stroke-width="4"/><ellipse cx="120" cy="95" rx="8" ry="10" fill="#fff" stroke="${INK}" stroke-width="4"/><circle cx="80" cy="99" r="4" fill="${INK}"/><circle cx="120" cy="99" r="4" fill="${INK}"/><path d="M82 134 Q100 118 118 134" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round"/><path d="M70 106 Q66 118 70 122 Q76 122 74 112 Z" fill="#8fd6ff" stroke="${INK}" stroke-width="2"/>`,
+  thinking: `<path d="M68 72 Q78 66 90 70 M110 66 Q122 60 134 66" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round"/><ellipse cx="80" cy="92" rx="9" ry="11" fill="#fff" stroke="${INK}" stroke-width="4"/><ellipse cx="120" cy="92" rx="9" ry="11" fill="#fff" stroke="${INK}" stroke-width="4"/><circle cx="84" cy="87" r="4.5" fill="${INK}"/><circle cx="124" cy="87" r="4.5" fill="${INK}"/><path d="M88 126 Q102 122 114 126" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>`,
+  angry: `<path d="M66 64 L92 76 M134 64 L108 76" fill="none" stroke="${INK}" stroke-width="6" stroke-linecap="round"/><ellipse cx="80" cy="92" rx="9" ry="10" fill="#fff" stroke="${INK}" stroke-width="4"/><ellipse cx="120" cy="92" rx="9" ry="10" fill="#fff" stroke="${INK}" stroke-width="4"/><circle cx="80" cy="94" r="4" fill="${INK}"/><circle cx="120" cy="94" r="4" fill="${INK}"/><path d="M84 132 Q100 120 116 132" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>`,
+  neutral: `<circle cx="80" cy="93" r="6" fill="${INK}"/><circle cx="120" cy="93" r="6" fill="${INK}"/><path d="M86 124 H114" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>`
+};
+const EXPR = { happy: "happy", smiling: "happy", smile: "happy", excited: "happy", glad: "happy", laughing: "proud", cheerful: "happy",
+  shocked: "shocked", surprised: "shocked", amazed: "shocked", wow: "shocked", scared: "shocked", confused: "thinking",
+  proud: "proud", confident: "proud", grinning: "proud", worried: "worried", nervous: "worried", anxious: "worried",
+  sad: "sad", upset: "sad", crying: "sad", thinking: "thinking", curious: "thinking", wondering: "thinking",
+  angry: "angry", cross: "angry", neutral: "neutral", calm: "neutral", serious: "neutral" };
+
+function shade(hex, f) {
+  const n = parseInt(hex.slice(1), 16), r = n >> 16, g = n >> 8 & 255, b = n & 255;
+  const m = v => clamp(Math.round(v * f), 0, 255);
+  return "#" + ((1 << 24) + (m(r) << 16) + (m(g) << 8) + m(b)).toString(16).slice(1);
+}
+
+function hairBack(ch) {
+  const h = ch.hair;
+  if (ch.hijab) return "";
+  if (ch.style === "puff") return `<circle cx="100" cy="30" r="40" fill="${h}"/>`;
+  if (ch.style === "bun") return `<circle cx="100" cy="28" r="26" fill="${h}"/>`;
+  if (ch.style === "long") return `<path d="M42 90 Q30 170 50 210 H150 Q170 170 158 90 Z" fill="${h}"/>`;
+  if (ch.style === "ponytail") return `<path d="M150 70 Q190 90 176 170 Q160 130 146 100 Z" fill="${h}"/>`;
+  if (ch.style === "plaits") return `<path d="M50 92 Q34 150 42 214" fill="none" stroke="${h}" stroke-width="20"/><path d="M150 92 Q166 150 158 214" fill="none" stroke="${h}" stroke-width="20"/><circle cx="42" cy="220" r="9" fill="#e63946"/><circle cx="158" cy="220" r="9" fill="#e63946"/>`;
+  return "";
+}
+function hairFront(ch) {
+  const h = ch.hair;
+  if (ch.hijab) return `<path d="M36 100 Q34 24 100 22 Q166 24 164 100 L164 150 Q100 175 36 150 Z" fill="${ch.lower || "#2a9d8f"}"/><circle cx="100" cy="96" r="52" fill="${ch.skin}"/>`;
+  if (ch.style === "bald") return `<path d="M44 96 Q40 70 52 60 Q56 78 58 96 Z M156 96 Q160 70 148 60 Q144 78 142 96 Z" fill="${h}"/>`;
+  if (ch.style === "curly") return `<path d="M44 88 Q30 60 52 50 Q50 30 74 32 Q84 16 100 26 Q116 16 126 32 Q150 30 148 50 Q170 60 156 88 Q140 62 100 60 Q60 62 44 88 Z" fill="${h}"/>`;
+  if (ch.style === "short") return `<path d="M44 84 Q40 30 100 30 Q162 28 156 84 Q150 62 128 58 Q118 72 100 62 Q82 74 70 60 Q52 64 44 84 Z" fill="${h}"/>`;
+  return `<path d="M42 90 Q38 28 100 30 Q162 28 158 90 Q150 58 100 56 Q50 58 42 90 Z" fill="${h}"/>`;
+}
+
+function personBody(ch) {
+  const sk = ch.skin, sh = ch.shirt, kid = !ch.adult;
+  let lower;
+  if (ch.saree) lower = `<path d="M58 250 H142 L156 386 H44 Z" fill="${sh}"/><path d="M48 360 H152 L156 386 H44 Z" fill="${shade(sh, .7)}"/>`;
+  else if (ch.veshti) lower = `<path d="M56 250 H144 L150 386 H50 Z" fill="#fbfbf6"/><path d="M52 368 H148" stroke="#d4a017" stroke-width="7"/>`;
+  else if (ch.type === "girl") lower = `<rect x="72" y="300" width="22" height="80" rx="8" fill="${sk}"/><rect x="106" y="300" width="22" height="80" rx="8" fill="${sk}"/><path d="M58 240 H142 L172 320 H28 Z" fill="${sh}"/><path d="M30 306 H170 L172 320 H28 Z" fill="#ffd166"/>`;
+  else if (ch.type === "woman") lower = `<rect x="72" y="320" width="22" height="60" rx="8" fill="${sk}"/><rect x="106" y="320" width="22" height="60" rx="8" fill="${sk}"/><path d="M58 240 H142 L160 336 H40 Z" fill="${ch.lower || shade(sh, .75)}"/>`;
+  else if (kid) lower = `<rect x="70" y="285" width="24" height="95" rx="8" fill="${sk}"/><rect x="106" y="285" width="24" height="95" rx="8" fill="${sk}"/><path d="M60 250 H140 L144 312 H104 L100 292 L96 312 H56 Z" fill="${ch.lower || "#c9a96e"}"/>`;
+  else lower = `<path d="M60 250 H140 L142 382 H104 L100 300 L96 382 H58 Z" fill="${ch.lower || "#34495e"}"/>`;
+  const shoes = `<path d="M58 378 h40 a7 7 0 0 1 0 14 h-40 a7 7 0 0 1 0 -14z" fill="#4a3426"/><path d="M102 378 h40 a7 7 0 0 1 0 14 h-40 a7 7 0 0 1 0 -14z" fill="#4a3426"/>`;
+  const top = `<path d="M58 168 Q100 152 142 168 L170 200 L150 222 L142 210 L142 262 H58 L58 210 L50 222 L30 200 Z" fill="${sh}"/>`;
+  const pallu = ch.saree ? `<path d="M58 172 L142 258 L122 262 L58 196 Z" fill="${shade(sh, .7)}"/>` : "";
+  const ears = ch.hijab ? "" : `<circle cx="42" cy="96" r="12" fill="${sk}"/><circle cx="158" cy="96" r="12" fill="${sk}"/>`;
+  let extra = "";
+  if (ch.moustache) extra += `<path d="M76 112 Q90 100 100 110 Q110 100 124 112 Q112 120 100 115 Q88 120 76 112 Z" fill="${ch.hair === "#cfcfcf" ? "#bdbdbd" : INK}"/>`;
+  if (ch.beard) extra += `<path d="M48 104 Q52 160 100 162 Q148 160 152 104 Q140 136 100 138 Q60 136 48 104 Z" fill="${ch.hair}"/>`;
+  if (ch.bindi) extra += `<circle cx="100" cy="66" r="5" fill="#e63946"/>`;
+  if (ch.cap) extra += `<path d="M42 70 Q44 24 100 24 Q156 24 158 70 Z" fill="${ch.lower || "#e63946"}"/><path d="M40 70 H186" stroke-width="10"/>`;
+  return `<g stroke="${INK}" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">${hairBack(ch)}${lower}${shoes}<rect x="88" y="138" width="24" height="28" fill="${sk}"/>${top}${pallu}${ears}<circle cx="100" cy="90" r="58" fill="${sk}"/>${hairFront(ch)}${extra}</g>`;
+}
+
+function arm(d, skin) { return `<path class="arm-o" d="${d}"/><path class="arm-i" stroke="${skin}" d="${d}"/>`; }
+function hand(x, y, skin) { return `<circle cx="${x}" cy="${y}" r="12" fill="${skin}" stroke="${INK}" stroke-width="5"/>`; }
+
+/* mirror=true means the active arm reaches to the viewer's left */
+function personSVG(ch, expr, pose, item, mirror) {
+  const sk = ch.skin;
+  let face = FACES[expr] || FACES.happy;
+  if (ch.glasses) face += `<g fill="none" stroke="${INK}" stroke-width="4"><circle cx="80" cy="93" r="18"/><circle cx="120" cy="93" r="18"/><path d="M98 92 H102 M62 90 L44 86 M138 90 L156 86"/></g>`;
+  const X = x => mirror ? 200 - x : x;
+  const aSide = mirror ? 40 : 160, oSide = mirror ? 160 : 40;
+  let arms = "";
+  const down = sx => arm(`M${sx} 214 Q${sx === 40 ? 24 : 176} 246 ${sx === 40 ? 32 : 168} 274`, sk) + hand(sx === 40 ? 32 : 168, 276, sk);
+  if (pose === "point") {
+    arms = down(oSide) + arm(`M${aSide} 214 Q${X(196)} 204 ${X(232)} 192`, sk) + hand(X(234), 191, sk);
+  } else if (pose === "wave" || pose === "cheer") {
+    arms = (pose === "cheer" ? arm(`M${oSide} 214 Q${X(4)} 180 ${X(14)} 128`, sk) + hand(X(14), 126, sk) : down(oSide))
+      + arm(`M${aSide} 214 Q${X(200)} 176 ${X(190)} 120`, sk) + hand(X(190), 118, sk)
+      + (pose === "wave" ? `<path d="M${X(212)} 92 Q${X(228)} 108 ${X(222)} 130 M${X(226)} 78 Q${X(248)} 104 ${X(238)} 136" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>` : "");
+  } else if (pose === "think") {
+    arms = down(aSide) + arm(`M${oSide} 214 Q${X(26)} 180 ${X(66)} 146`, sk) + hand(X(66), 144, sk);
+  } else if (pose === "hold" || pose === "show") {
+    arms = down(oSide) + arm(`M${aSide} 214 Q${X(204)} 182 ${X(200)} 134`, sk) + (hasEmoji(item) && !moneyRe(item) ? itemSVG(item, X(214), 84, 70, true) : itemSVG(item, X(200), 98, 52, true)) + hand(X(200), 132, sk);
+  } else {
+    arms = down(40) + down(160);
+  }
+  return personBody(ch) + face + arms;
+}
+
+/* ---------- drawing: things ---------- */
+function moneyRe(s) { return /^(?:note\s+)?["“]?([₹$£€¥]\s?[\d,.]+\s?[kKmM]?|\d+\s?(?:rs|rupees|dollars|euros|pounds))["”]?$/i.exec(s.trim()); }
+function itemSVG(item, cx, cy, size, inHand) {
+  if (!item) return "";
+  const t = item.trim(); const m = moneyRe(t);
+  if (m) {
+    const w = size * 1.7, h = size * .95;
+    return `<g transform="translate(${cx},${cy})"><rect x="${-w / 2}" y="${-h / 2}" width="${w}" height="${h}" rx="4" fill="#9fd8a0" stroke="${INK}" stroke-width="4"/><rect x="${-w / 2 + 7}" y="${-h / 2 + 7}" width="${w - 14}" height="${h - 14}" rx="3" fill="none" stroke="#4a9a5a" stroke-width="2"/><text class="t" y="${size * .17}" text-anchor="middle" font-size="${size * .5}" fill="${INK}">${esc(m[1])}</text></g>`;
+  }
+  if (hasEmoji(t) && [...t].length <= 4) return `<text class="emo" x="${cx}" y="${cy + size * .35}" text-anchor="middle" font-size="${size}">${esc(t)}</text>`;
+  return signSVG(t, cx, cy, inHand ? 26 : 34, false);
+}
+
+/* text with ~~strike~~ support -> tspans; strike lines added after render */
+function richText(s, x, y, fs, anchor, fill, hl) {
+  const parts = s.replace(/->/g, "→").split(/(~~.+?~~)/);
+  let out = `<text class="t" x="${x}" y="${y}" font-size="${fs}" text-anchor="${anchor}" fill="${fill}">`;
+  let eqSeen = false;
+  for (const part of parts) {
+    if (!part) continue;
+    if (part.startsWith("~~")) { out += `<tspan data-strike="1" fill="#999">${esc(part.slice(2, -2))}</tspan>`; continue; }
+    if (hl) {
+      const i = part.indexOf("=");
+      if (i >= 0 && !eqSeen) { eqSeen = true; out += `${wrapEmo(part.slice(0, i + 1))}<tspan fill="${hl}">${wrapEmo(part.slice(i + 1))}</tspan>`; continue; }
+    }
+    out += wrapEmo(part);
+  }
+  return out + "</text>";
+}
+function wrapEmo(s) { return esc(s).replace(/(\p{Extended_Pictographic}️?)/gu, '<tspan class="emo">$1</tspan>'); }
+function textW(s, fs) { let w = 0; for (const ch of s.replace(/~~/g, "")) w += /\p{Extended_Pictographic}/u.test(ch) ? fs * 1.15 : /[A-Z₹@MW]/.test(ch) ? fs * .66 : ch === " " ? fs * .32 : fs * .54; return w; }
+
+function signSVG(text, cx, cy, fs, stick) {
+  const lines = text.split(/\s\/\s/);
+  const w = Math.max(...lines.map(l => textW(l, fs))) + fs * 1.4, h = lines.length * fs * 1.25 + fs * .9;
+  let out = `<g>`;
+  if (stick) out += `<rect x="${cx - 7}" y="${cy + h / 2 - 4}" width="14" height="${stick}" fill="#8b5a2b" stroke="${INK}" stroke-width="4"/>`;
+  out += `<rect x="${cx - w / 2}" y="${cy - h / 2}" width="${w}" height="${h}" rx="10" fill="#fff3c4" stroke="${INK}" stroke-width="5"/>`;
+  lines.forEach((l, i) => { out += richText(l, cx, cy - h / 2 + fs * 1.05 + i * fs * 1.25 + fs * .1, fs, "middle", INK); });
+  return out + `</g>`;
+}
+
+function parseThing(tok) {
+  let t = tok.trim();
+  let m = t.match(/^(sign|board|label|card)\s+["“](.+?)["”]$/i) || t.match(/^(sign|card)\b\s*:?\s*(.+)$/i);
+  if (m) return { kind: "sign", text: m[2].replace(/^["“]|["”]$/g, "") };
+  t = t.replace(/^["“]|["”]$/g, "");
+  let crossed = false, big = false;
+  if ((m = t.match(/^(crossed|no|not)\s+(.+)$/i))) { crossed = true; t = m[2]; }
+  if ((m = t.match(/^(big|large|giant)\s+(.+)$/i))) { big = true; t = m[2]; }
+  let n = 1;
+  if ((m = t.match(/^(.+?)\s*[x×]\s*(\d+)$/i))) { t = m[1].trim(); n = +m[2]; }
+  else if ((m = t.match(/^(\d+)\s*[x×]?\s+(.+)$/))) { n = +m[1]; t = m[2].trim(); }
+  return { kind: "item", text: t, n: clamp(n, 1, 40), crossed, big };
+}
+
+/* lays out things inside a box; returns svg */
+function thingsSVG(list, x0, w, bottom, maxH) {
+  const items = list.map(parseThing);
+  const blocks = [];
+  const signFs = Math.min(...items.filter(i => i.kind === "sign").map(i => clamp(w / Math.max(6, textW(i.text.split(/\s\/\s/).sort((a, b) => b.length - a.length)[0], 1) + 1.6), 22, 46)), 46);
+  for (const it of items) {
+    if (it.kind === "sign") {
+      const fs = signFs;
+      const lines = it.text.split(/\s\/\s/).length;
+      blocks.push({ h: lines * fs * 1.25 + fs * .9 + 14, draw: (cx, cy) => signSVG(it.text, cx, cy, fs, 0) });
+    } else {
+      const n = it.n, money = !!moneyRe(it.text), emo = hasEmoji(it.text);
+      const rows = n <= 5 ? 1 : Math.ceil(n / Math.ceil(Math.sqrt(n * 1.6)));
+      const cols = Math.ceil(n / rows);
+      const unitW = money ? 1.8 : emo ? 1.1 : 1;
+      let s = Math.min(it.big ? 170 : 90, (w * .8) / (cols * unitW));
+      if (!emo && !money) {
+        blocks.push({ h: 70, draw: (cx, cy) => signSVG((n > 1 ? n + " × " : "") + it.text, cx, cy, 30, 0) + (it.crossed ? crossSVG(cx, cy, 34) : "") });
+        continue;
+      }
+      blocks.push({ h: rows * s * (money ? 1.05 : 1.08) + 10, s, draw: (cx, cy, sc) => {
+        const ss = s * sc; let o = "";
+        const gw = cols * ss * unitW, gh = rows * ss * (money ? 1.05 : 1.08);
+        for (let i = 0; i < n; i++) {
+          const r = Math.floor(i / cols), col = i % cols, inRow = Math.min(cols, n - r * cols);
+          const rowW = inRow * ss * unitW;
+          const x = cx - rowW / 2 + (col + .5) * ss * unitW, y = cy - gh / 2 + (r + .5) * ss * (money ? 1.05 : 1.08);
+          o += itemSVG(it.text, x, y - (money ? 0 : ss * .05), ss * (money ? .62 : .9), false);
+        }
+        if (it.crossed) o += crossSVG(cx, cy, Math.max(gw, gh) / 2);
+        return o;
+      } });
+    }
+  }
+  if (!blocks.length) return "";
+  const gap = 18, total = blocks.reduce((a, b) => a + b.h, 0) + gap * (blocks.length - 1);
+  const sc = Math.min(1, maxH / total);
+  let y = bottom - total * sc, out = "";
+  const cx = x0 + w / 2;
+  for (const b of blocks) { const h = b.h * sc; out += b.draw(cx, y + h / 2, sc); y += h + gap * sc; }
+  return out;
+}
+function crossSVG(cx, cy, r) { return `<path d="M${cx - r} ${cy - r} L${cx + r} ${cy + r} M${cx + r} ${cy - r} L${cx - r} ${cy + r}" stroke="#e63946" stroke-width="10" stroke-linecap="round" opacity=".9"/>`; }
+
+/* ---------- drawing: places ---------- */
+function bunting(y) {
+  const cols = ["#e63946", "#ffd166", "#52b788", "#9b5de5", "#f15bb5"]; let o = `<path d="M-10 ${y} Q540 ${y + 100} 1090 ${y}" fill="none" stroke="${INK}" stroke-width="4"/>`;
+  for (let i = 0; i < 10; i++) { const t = .05 + i * .1, x = -10 + 1100 * t, yy = y + 200 * t * (1 - t) * .5 * 2 * .5 * 2; o += `<path d="M${x - 26} ${yy} L${x + 26} ${yy} L${x} ${yy + 50}Z" fill="${cols[i % 5]}" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/>`; }
+  return o;
+}
+function tree(x, g) { return `<g stroke="${INK}" stroke-width="5"><rect x="${x - 14}" y="${g - 170}" width="28" height="170" fill="#8b5a2b"/><circle cx="${x}" cy="${g - 200}" r="80" fill="#52b788"/><circle cx="${x - 50}" cy="${g - 160}" r="50" fill="#52b788"/><circle cx="${x + 50}" cy="${g - 160}" r="50" fill="#52b788"/></g>`; }
+function windowSVG(x, y) { return `<rect x="${x}" y="${y}" width="190" height="170" fill="#9be0ff" stroke="${INK}" stroke-width="8"/><path d="M${x + 95} ${y} V${y + 170} M${x} ${y + 85} H${x + 190}" stroke="${INK}" stroke-width="6"/>`; }
+
+function placeSVG(place, g) {
+  const p = (place || "").toLowerCase();
+  const ground = (fill) => `<rect x="-5" y="${g}" width="1090" height="${1090 - g}" fill="${fill}" stroke="${INK}" stroke-width="5"/>`;
+  if (/inside|body|blood|cell|microscope|germ/.test(p))
+    return `<rect width="1080" height="1080" fill="#ffd0d8"/>` + [[150, 300], [930, 260], [880, 760], [170, 700], [540, 210]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="50" ry="30" fill="#e63946" stroke="${INK}" stroke-width="4"/><ellipse cx="${x}" cy="${y}" rx="20" ry="10" fill="#b5212d"/>`).join("");
+  if (/space|night|star|moon|planet/.test(p))
+    return `<rect width="1080" height="1080" fill="#1d2b53"/>` + Array.from({ length: 40 }, (_, i) => `<circle cx="${(i * 137) % 1080}" cy="${(i * 263) % 760}" r="${2 + i % 3}" fill="#fff"/>`).join("") + ground("#5f574f");
+  if (/beach|sea|ocean|river|pond|lake/.test(p))
+    return `<rect width="1080" height="1080" fill="#8fd6ff"/><rect x="-5" y="${g - 160}" width="1090" height="170" fill="#2f9be0" stroke="${INK}" stroke-width="5"/>` + ground("#f6d39a");
+  if (/class|school|lab|lecture|college|teach/.test(p))
+    return `<rect width="1080" height="1080" fill="#ffe9c7"/><rect x="250" y="150" width="580" height="250" rx="8" fill="#2f5d46" stroke="#8b5a2b" stroke-width="14"/>` + ground("#e0b07a");
+  if (/kitchen|home|house|room|living|bed|dining/.test(p))
+    return `<rect width="1080" height="1080" fill="#c9f0e4"/>` + windowSVG(820, 150) + `<rect x="80" y="170" width="150" height="110" fill="#ffd166" stroke="${INK}" stroke-width="6"/>` + ground("#f4b36b");
+  if (/office|bank|shop|store|counter|hospital|clinic|post/.test(p))
+    return `<rect width="1080" height="1080" fill="#e3ecff"/>` + windowSVG(80, 140) + windowSVG(810, 140) + ground("#b9c4d6");
+  if (/park|garden|play|farm|village|field|forest|tree|outdoor|ground/.test(p))
+    return `<rect width="1080" height="1080" fill="#8fd6ff"/><circle cx="930" cy="150" r="60" fill="#ffd166" stroke="${INK}" stroke-width="5"/>` + tree(120, g) + ground("#7ccf6a");
+  if (/temple|festival|fair|market|bazaar|street|road|stall|mela|thiruvizha|bus|town/.test(p)) {
+    const temple = /temple|festival|thiruvizha/.test(p) ? `<g transform="translate(860,0)" stroke="${INK}" stroke-width="5" stroke-linejoin="round"><path d="M-130 ${g} L-112 ${g - 170} H112 L130 ${g}Z" fill="#f4a259"/><path d="M-112 ${g - 170} L-92 ${g - 300} H92 L112 ${g - 170}Z" fill="#f7b267"/><path d="M-92 ${g - 300} L-70 ${g - 410} H70 L92 ${g - 300}Z" fill="#f4a259"/><path d="M-76 ${g - 410} Q0 ${g - 490} 76 ${g - 410}Z" fill="#e76f51"/><path d="M-30 ${g} V${g - 80} Q0 ${g - 115} 30 ${g - 80} V${g}Z" fill="#6b3410"/></g>` : "";
+    return `<rect width="1080" height="1080" fill="#8fd6ff"/>${temple}` + ground("#f6d39a") + bunting(90);
+  }
+  return `<defs><pattern id="hd" width="36" height="36" patternUnits="userSpaceOnUse"><circle cx="18" cy="18" r="6" fill="#ffffff" opacity=".45"/></pattern></defs><rect width="1080" height="1080" fill="#ffe08a"/><rect width="1080" height="1080" fill="url(#hd)"/>` + ground("#f4c66b");
+}
+
+function boardSVG(lines, x, y, w, h) {
+  const inner = w - 90, rows = [];
+  for (const l of lines) {
+    const i = l.indexOf("=");
+    if (textW(l, 38) > inner && i > 0) { rows.push({ t: l.slice(0, i + 1).trim(), c: "#fdfdf5" }); rows.push({ t: "   " + l.slice(i + 1).trim(), c: "#ffe14d", gapAfter: 1 }); }
+    else rows.push({ t: l, hl: true, gapAfter: 1 });
+  }
+  const units = rows.reduce((a, r) => a + 1.25 + (r.gapAfter ? .35 : 0), 0);
+  const fs = clamp(Math.min((h - 70) / units, inner / Math.max(...rows.map(r => textW(r.t, 1)))), 22, 56);
+  let o = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="10" fill="#8b5a2b" stroke="${INK}" stroke-width="6"/><rect x="${x + 18}" y="${y + 18}" width="${w - 36}" height="${h - 36}" fill="#2f5d46" stroke="${INK}" stroke-width="4"/>`;
+  let yy = y + h / 2 - units * fs / 2 + fs * .95;
+  for (const r of rows) { o += richText(r.t, x + 44, yy, fs, "start", r.c || "#fdfdf5", r.hl ? "#ffe14d" : ""); yy += fs * (1.25 + (r.gapAfter ? .35 : 0)); }
+  return o;
+}
+
+/* ---------- rendering ---------- */
+function parseShow(c, entry) {
+  const s = entry.trim();
+  const m = s.match(/^(.+?)(?:\s+(holding|holds|with|showing)\s+(.+))?$/i);
+  const words = m[1].split(/\s+/);
+  let nameWords = [], expr = "", pose = "";
+  for (const w of words) {
+    const lw = w.toLowerCase();
+    if (EXPR[lw] && nameWords.length) expr = EXPR[lw];
+    else if (/^(pointing|points)$/.test(lw)) pose = "point";
+    else if (/^(waving|waves)$/.test(lw)) pose = "wave";
+    else if (/^(cheering|jumping|celebrating)$/.test(lw)) { pose = "cheer"; expr = expr || "happy"; }
+    else if (/^(thinking)$/.test(lw)) { expr = "thinking"; pose = "think"; }
+    else if (!expr && !pose) nameWords.push(w);
+  }
+  const ch = ensureChar(c, nameWords.join(" ") || words[0]);
+  const item = m[3] ? m[3].trim() : "";
+  return { ch, expr: expr || "happy", pose: item ? "hold" : pose, item };
+}
+
+let labelColors = {};
+function panelEl(c, p, idx) {
+  const sec = document.createElement("section");
+  sec.className = "panel";
+  sec.setAttribute("aria-label", `Panel ${p.n}: ${p.title}`);
+  let shows = p.show.map(s => parseShow(c, s));
+  if (!shows.length) {
+    const names = [...new Set(p.speech.map(s => s.who))].slice(0, 3);
+    shows = (names.length ? names : c.chars.slice(0, 2).map(x => x.name)).map(n => ({ ch: ensureChar(c, n), expr: "happy", pose: "", item: "" }));
+  }
+  shows = shows.slice(0, 5);
+  const hasBoard = p.board.length > 0, hasThings = p.things.length > 0 && !hasBoard;
+
+  // horizontal slots
+  const slots = [];
+  if (hasBoard) {
+    const w = 330 / Math.max(1, shows.length);
+    shows.forEach((s, i) => slots.push({ type: "char", s, x: 730 + w * i, w }));
+  } else {
+    const n = shows.length + (hasThings ? 1 : 0);
+    const mid = hasThings ? (shows.length === 1 ? 1 : Math.floor(n / 2)) : -1;
+    const tw = hasThings ? Math.min(460, 1000 / n * 1.25) : 0;
+    const cw = (1000 - tw) / Math.max(1, shows.length);
+    let x = 40, k = 0;
+    for (let i = 0; i < n; i++) {
+      if (i === mid) { slots.push({ type: "things", x, w: tw }); x += tw; }
+      else { slots.push({ type: "char", s: shows[k++], x, w: cw }); x += cw; }
+    }
+  }
+  const charSlots = slots.filter(s => s.type === "char");
+  charSlots.forEach(sl => { sl.cx = sl.x + sl.w / 2; sl.s.mirror = sl.cx > 540; });
+
+  // text layer
+  let html = "";
+  if (p.label) {
+    const key = p.label.toLowerCase();
+    if (!(key in labelColors)) labelColors[key] = ["#e63946", "#2f7de1", "#2a9d8f", "#8e5bd6"][Object.keys(labelColors).length % 4];
+    html += `<div class="when" style="background:${labelColors[key]}"><b>${p.n} · ${esc(p.label)}</b><small>${esc(p.title)}</small></div>`;
+  } else html += `<div class="tag">${p.n} · ${esc(p.title)}</div>`;
+  if (hasBoard && p.title) html = html.replace('class="tag"', 'class="tag" style="font-size:4.4cqw"');
+  p.speech.forEach((sp, i) => { html += `<div class="${sp.think ? "think" : "bubble"}" data-i="${i}">${esc(sp.text)}</div>`; });
+  if (p.caption) html += `<div class="caption">${esc(p.caption)}</div>`;
+  sec.innerHTML = html;
+  sec._layout = () => layoutPanel(c, p, sec, slots, charSlots, hasBoard, hasThings);
+  return sec;
+}
+
+function layoutPanel(c, p, sec, slots, charSlots, hasBoard, hasThings) {
+  const W = sec.clientWidth, U = 1080 / W;              // px -> svg units
+  const topEl = sec.querySelector(".when, .tag");
+  const topY = (topEl.offsetTop + topEl.offsetHeight) * U + 22;
+  const bannerRight = (topEl.offsetLeft + topEl.offsetWidth) * U + 20;
+  const colsBottom = { L: topY, R: topY };
+  let lowest = topY;
+  const bubbles = [...sec.querySelectorAll(".bubble, .think")];
+  bubbles.forEach(b => {
+    const sp = p.speech[+b.dataset.i];
+    const slot = charSlots.find(s => s.s.ch === findChar(c, sp.who)) || null;
+    const cx = slot ? slot.cx : 540;
+    const wPct = bubbles.length === 1 ? 64 : 47;
+    b.style.width = wPct + "%";
+    let left = clamp(cx / 10.8 - wPct / 2, 3, 97 - wPct);
+    const col = left + wPct / 2 < 50 ? "L" : "R";
+    if (bubbles.length > 1 && (col === "L" ? left > 3 : left < 97 - wPct)) left = col === "L" ? 3 : 97 - wPct;
+    b.style.left = left + "%";
+    const startY = left * 10.8 > bannerRight ? 40 : topY;
+    const y = Math.max(colsBottom[col] === topY ? startY : colsBottom[col], startY);
+    b.style.top = (y / 10.8) + "%";
+    const h = b.offsetHeight * U;
+    colsBottom[col] = y + h + 70;
+    if (bubbles.length > 1) colsBottom[col === "L" ? "R" : "L"] = Math.max(colsBottom[col === "L" ? "R" : "L"], y + 10);
+    lowest = Math.max(lowest, y + h);
+    const tail = clamp((cx / 10.8 - left) / wPct * 100 - 6, 6, 80);
+    b.style.setProperty("--tail", tail + "%");
+    b.style.setProperty("--tip", ((cx / 10.8 - left) / wPct * 100 > tail + 6 ? 90 : 20) + "%");
+    b.style.setProperty("--dir", (cx / 10.8 - left) / wPct * 100 > tail ? 1 : -1);
+  });
+  const cap = sec.querySelector(".caption");
+  const feet = cap ? Math.min(930, cap.offsetTop * U - 18) : 930;
+  const headTop = (bubbles.length ? lowest + 75 : topY + 20);
+  const avail = Math.max(220, feet - headTop);
+  const anyAdult = charSlots.some(s => s.s.ch.adult);
+  const minW = Math.min(...charSlots.map(s => s.w), 400);
+  const base = clamp(Math.min(avail / (392 * (anyAdult ? 1.12 : 1)), minW / 215), .45, 1.4);
+
+  let svg = placeSVG(p.place || p.scene || p.title, feet - 6);
+  if (hasBoard) {
+    const by = Math.max(topY + 10, 170), bh = Math.min(feet - by - 40, 600);
+    svg = svg.replace(/<rect x="250" y="150"[^>]*\/>/, "") + boardSVG(p.board, 40, by, 670, bh);
+  }
+  for (const sl of slots) {
+    if (sl.type === "things") svg += thingsSVG(p.things, sl.x, sl.w, feet - 8, feet - headTop + 40);
+  }
+  for (const sl of charSlots) {
+    const { ch, expr, pose, item, mirror } = sl.s;
+    const sc = base * (ch.adult ? 1.12 : 1);
+    const x = sl.cx - 100 * sc, y = feet - 392 * sc;
+    svg += `<g transform="translate(${x.toFixed(1)},${y.toFixed(1)}) scale(${sc.toFixed(3)})">${personSVG(ch, expr, pose, item, mirror)}</g>`;
+  }
+  const el = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  el.setAttribute("viewBox", "0 0 1080 1080"); el.setAttribute("aria-hidden", "true");
+  el.innerHTML = svg;
+  sec.prepend(el);
+  strikeLines(el);
+}
+
+function strikeLines(svg) {
+  svg.querySelectorAll("[data-strike]").forEach(t => {
+    try {
+      const b = t.getBBox();
+      const l = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      l.setAttribute("d", `M${b.x - 4} ${b.y + b.height * .62} L${b.x + b.width + 4} ${b.y + b.height * .42}`);
+      l.setAttribute("stroke", "#e63946"); l.setAttribute("stroke-width", Math.max(4, b.height * .12)); l.setAttribute("stroke-linecap", "round");
+      t.parentNode.parentNode.insertBefore(l, t.parentNode.nextSibling);
+    } catch (e) { }
+  });
+}
+
+function titleEl(c) {
+  const sec = document.createElement("section");
+  sec.className = "panel title-card";
+  const t = c.title || "My Comic";
+  const fs = clamp(150 / Math.max(4, t.length) * 1.1, 8, 21);
+  sec.innerHTML = `<div class="kicker">CONCEPT TO COMICS</div><h1 style="font-size:${fs}cqw">${esc(t)}</h1>` +
+    (c.subtitle ? `<div class="sub" style="top:${13 + fs * 1.15}cqw">${esc(c.subtitle)}</div>` : "") +
+    (c.setup ? `<div class="setup" style="top:${23 + fs * 1.15}cqw">${esc(c.setup)}</div>` : "");
+  sec._layout = () => {
+    const cast = c.chars.slice(0, 4);
+    const feet = 1040, n = Math.max(1, cast.length), w = 900 / n, base = clamp(Math.min(430 / (392 * 1.12), w / 215), .5, 1.2);
+    let svg = `<defs><pattern id="td" width="36" height="36" patternUnits="userSpaceOnUse"><circle cx="18" cy="18" r="7" fill="#ffb703"/></pattern></defs><rect width="1080" height="1080" fill="#ffd23f"/><rect width="1080" height="1080" fill="url(#td)" opacity=".5"/>`;
+    cast.forEach((ch, i) => {
+      const sc = base * (ch.adult ? 1.12 : 1), cx = 90 + w * (i + .5);
+      svg += `<g transform="translate(${cx - 100 * sc},${feet - 392 * sc}) scale(${sc})">${personSVG(ch, "happy", i === 0 ? "wave" : "", "", cx > 540)}</g>`;
+    });
+    const el = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    el.setAttribute("viewBox", "0 0 1080 1080"); el.setAttribute("aria-hidden", "true");
+    el.innerHTML = svg; sec.prepend(el);
+  };
+  return sec;
+}
+
+function sheetEl(c) {
+  const sec = document.createElement("section");
+  sec.className = "panel sheet";
+  sec.innerHTML = `<div class="in"><h2>Cheat sheet 🧠</h2>` +
+    (c.map.length ? `<table>${c.map.map(r => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join("")}</table>` : "") +
+    (c.breaks ? `<div class="breaks"><b>Where this analogy breaks:</b> ${esc(c.breaks)}</div>` : "") + `</div>`;
+  sec._layout = () => {
+    const t = sec.querySelector("table"), inn = sec.querySelector(".in");
+    for (let f = 4.2; t && f > 2; f -= .2) { t.style.fontSize = f + "cqw"; if (inn.scrollHeight <= inn.clientHeight + 2) break; }
+  };
+  return sec;
+}
+
+function render(text) {
+  const c = parse(text);
+  const msg = $("#msg");
+  if (!c.panels.length) { msg.textContent = "I couldn't find any panels. Each panel should start with a line like: PANEL 1 - Title"; return false; }
+  msg.textContent = "";
+  labelColors = {};
+  const root = $("#comic"); root.innerHTML = "";
+  const els = [titleEl(c), ...c.panels.map((p, i) => panelEl(c, p, i))];
+  if (c.map.length || c.breaks) els.push(sheetEl(c));
+  els.forEach(e => root.appendChild(e));
+  const run = () => els.forEach(e => { e.querySelector(":scope > svg")?.remove(); e._layout && e._layout(); });
+  run();
+  document.fonts && document.fonts.ready.then(run);
+  clearTimeout(render._t);
+  window.onresize = () => { clearTimeout(render._t); render._t = setTimeout(run, 150); };
+  document.title = (c.title ? c.title + " · " : "") + "Concept to Comics";
+  return true;
+}
+
+/* ---------- share links ---------- */
+async function pack(text) {
+  const bytes = new TextEncoder().encode(text);
+  let data = bytes, tag = "p";
+  if (window.CompressionStream) {
+    data = new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new CompressionStream("deflate-raw"))).arrayBuffer()); tag = "z";
+  }
+  let bin = ""; data.forEach(b => bin += String.fromCharCode(b));
+  return tag + btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+async function unpack(s) {
+  const tag = s[0], b64 = s.slice(1).replace(/-/g, "+").replace(/_/g, "/");
+  const bytes = Uint8Array.from(atob(b64), ch => ch.charCodeAt(0));
+  if (tag === "z") return new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).text();
+  return new TextDecoder().decode(bytes);
+}
+
+/* ---------- UI ---------- */
+function showEditor(on) { $("#editor").classList.toggle("hidden", !on); $("#btnEdit").classList.toggle("hidden", on); }
+$("#btnDraw").onclick = () => { if (render($("#src").value)) { showEditor(false); history.replaceState(null, "", location.pathname); window.scrollTo(0, 0); } };
+$("#btnExample").onclick = () => { $("#src").value = EXAMPLE; $("#btnDraw").click(); };
+$("#btnEdit").onclick = () => { showEditor(true); window.scrollTo(0, 0); };
+$("#btnPrint").onclick = () => window.print();
+$("#btnShare").onclick = async () => {
+  const text = $("#src").value.trim();
+  if (!text) { $("#msg").textContent = "Paste a script first, then share."; showEditor(true); return; }
+  const url = location.origin + location.pathname + "#c=" + await pack(text);
+  try { await navigator.clipboard.writeText(url); alert("Share link copied! Anyone with the link sees this comic."); }
+  catch (e) { prompt("Copy this link:", url); }
+};
+(async () => {
+  const m = location.hash.match(/^#c=(.+)$/);
+  if (m) {
+    try { $("#src").value = await unpack(m[1]); if (render($("#src").value)) { showEditor(false); return; } }
+    catch (e) { $("#msg").textContent = "This share link looks broken. Paste the script again."; }
+  }
+  showEditor(true);
+})();
+</script>
+</body>
+</html>

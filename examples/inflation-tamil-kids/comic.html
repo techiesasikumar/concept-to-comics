@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inflation: Kavin and the mango stall | Concept to Comics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --paper: #fffaf0;
+    --yellow: #ffe14d;
+    --red: #e63946;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    background-image: radial-gradient(#e8dcc4 1.2px, transparent 1.2px);
+    background-size: 14px 14px;
+    font-family: "Comic Neue", "Comic Sans MS", cursive, sans-serif;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .comic {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 28px;
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 28px 20px 8px;
+  }
+  .panel {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    border: 6px solid var(--ink);
+    background: #fff;
+    overflow: hidden;
+    container-type: inline-size;
+    box-shadow: 8px 8px 0 var(--ink);
+  }
+  .panel > svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+  /* Panel number + title tag */
+  .tag {
+    position: absolute; top: 3cqw; left: 3cqw;
+    background: var(--ink); color: #fff;
+    font-size: 3.6cqw; line-height: 1;
+    padding: 1.4cqw 2.4cqw; border-radius: 2cqw;
+    letter-spacing: .02em;
+  }
+
+  /* Caption box */
+  .caption {
+    position: absolute;
+    background: var(--yellow);
+    border: .6cqw solid var(--ink);
+    box-shadow: .9cqw .9cqw 0 var(--ink);
+    padding: 2cqw 3cqw;
+    font-size: 4.6cqw; line-height: 1.22;
+  }
+
+  /* Speech bubble with a tail */
+  .bubble {
+    position: absolute;
+    background: #fff;
+    border: .6cqw solid var(--ink);
+    border-radius: 7cqw;
+    padding: 2.4cqw 3.8cqw;
+    font-size: 5cqw; line-height: 1.2;
+    text-align: center;
+  }
+  .bubble::before, .bubble::after {
+    content: ""; position: absolute; top: 100%;
+    left: var(--tail, 60%);
+    width: 6cqw; height: 7cqw;
+  }
+  .bubble::before { background: var(--ink); clip-path: polygon(0 0, 100% 0, var(--tip, 70%) 100%); }
+  .bubble::after  { background: #fff; clip-path: polygon(.9cqw 0, calc(100% - .9cqw) 0, var(--tip, 70%) calc(100% - 1.5cqw)); }
+
+  /* Time banner: makes "last year" vs "this year" impossible to miss */
+  .when {
+    position: absolute; top: 3cqw; left: 3cqw;
+    background: var(--red); color: #fff;
+    border: .6cqw solid var(--ink); box-shadow: .8cqw .8cqw 0 var(--ink);
+    padding: 1.2cqw 2.6cqw 1.4cqw; transform: rotate(-2deg); line-height: 1;
+  }
+  .when.now { background: #2f7de1; }
+  .when b { display: block; font-family: "Bangers", cursive; font-weight: 400; font-size: 5.4cqw; letter-spacing: .04em; }
+  .when small { display: block; font-size: 3.2cqw; margin-top: .6cqw; }
+
+  /* Thought bubble (cloud with little circles) */
+  .think {
+    position: absolute; background: #fff;
+    border: .6cqw solid var(--ink); border-radius: 9cqw;
+    padding: 2.2cqw 3.4cqw; font-size: 5cqw; line-height: 1.2; text-align: center;
+  }
+  .think::before, .think::after {
+    content: ""; position: absolute; background: #fff;
+    border: .6cqw solid var(--ink); border-radius: 50%;
+  }
+  .think::before { width: 4.2cqw; height: 4.2cqw; left: var(--tx, 10%); top: calc(100% + 1cqw); }
+  .think::after  { width: 2.6cqw; height: 2.6cqw; left: calc(var(--tx, 10%) - 3.6cqw); top: calc(100% + 6cqw); }
+  .mini { display: block; margin: 1cqw auto 0; height: 8cqw; width: auto; overflow: visible; }
+
+  .big { font-family: "Bangers", "Comic Neue", cursive; font-weight: 400; letter-spacing: .03em; }
+  .hl { color: var(--red); }
+
+  /* Title card */
+  .title-card .kicker {
+    position: absolute; top: 5cqw; left: 50%; transform: translateX(-50%) rotate(-2deg);
+    background: var(--ink); color: var(--yellow);
+    font-size: 3.8cqw; padding: 1.4cqw 3cqw; white-space: nowrap;
+  }
+  .title-card h1 {
+    position: absolute; top: 12cqw; left: 0; right: 0; margin: 0;
+    text-align: center; font-size: 19cqw; line-height: 1;
+    color: var(--red);
+    -webkit-text-stroke: .5cqw var(--ink);
+    text-shadow: 1.2cqw 1.2cqw 0 var(--ink);
+  }
+  .title-card .sub {
+    position: absolute; top: 33cqw; left: 50%; transform: translateX(-50%) rotate(1.5deg);
+    background: #fff; border: .6cqw solid var(--ink); box-shadow: .9cqw .9cqw 0 var(--ink);
+    font-size: 5cqw; padding: 1.6cqw 3.4cqw; white-space: nowrap;
+  }
+  .title-card .setup {
+    position: absolute; top: 44cqw; left: 50%; transform: translateX(-50%);
+    font-size: 3.4cqw; white-space: nowrap; background: rgba(255,255,255,.85);
+    padding: .8cqw 2.4cqw; border-radius: 3cqw;
+  }
+
+  /* Panel 4 heading */
+  .reveal-title {
+    position: absolute; top: 3.5cqw; left: 0; right: 0; margin: 0;
+    text-align: center; font-size: 8.4cqw; line-height: 1;
+    color: var(--red);
+    -webkit-text-stroke: .35cqw var(--ink);
+    text-shadow: .8cqw .8cqw 0 var(--ink);
+  }
+
+  footer {
+    text-align: center; padding: 26px 16px 40px;
+    font-size: 18px;
+  }
+  footer span { background: var(--ink); color: var(--yellow); padding: 6px 14px; border-radius: 20px; }
+
+  /* SVG helpers */
+  .arm-o { fill: none; stroke: var(--ink); stroke-width: 22; stroke-linecap: round; stroke-linejoin: round; }
+  .arm-i { fill: none; stroke: #a8693f; stroke-width: 12; stroke-linecap: round; stroke-linejoin: round; }
+  .arm-i.s2 { stroke: #8a5a33; }
+  .hand { fill: #a8693f; stroke: var(--ink); stroke-width: 5; }
+  .hand.s2 { fill: #8a5a33; }
+  .svgtxt { font-family: "Comic Neue", "Comic Sans MS", cursive, sans-serif; font-weight: 700; }
+  .chalk { fill: #fdfdf5; }
+</style>
+</head>
+<body>
+
+<!-- Shared drawings: characters, stall, mango, note -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- KAVIN: 10-year-old boy, blue shirt, khaki shorts. Local box 200 x 400, feet at y~392 -->
+    <g id="kavin" stroke="#1a1a1a" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+      <rect x="70" y="285" width="24" height="95" rx="8" fill="#a8693f"/>
+      <rect x="106" y="285" width="24" height="95" rx="8" fill="#a8693f"/>
+      <path d="M58 378 h40 a7 7 0 0 1 0 14 h-40 a7 7 0 0 1 0 -14z" fill="#7a4a24"/>
+      <path d="M102 378 h40 a7 7 0 0 1 0 14 h-40 a7 7 0 0 1 0 -14z" fill="#7a4a24"/>
+      <path d="M60 250 H140 L144 312 H104 L100 292 L96 312 H56 Z" fill="#c9a96e"/>
+      <rect x="88" y="138" width="24" height="28" fill="#a8693f"/>
+      <path d="M58 168 Q100 152 142 168 L170 200 L150 222 L142 210 L142 262 H58 L58 210 L50 222 L30 200 Z" fill="#2f7de1"/>
+      <path d="M84 162 L100 184 L116 162" fill="none"/>
+      <circle cx="42" cy="96" r="12" fill="#a8693f"/>
+      <circle cx="158" cy="96" r="12" fill="#a8693f"/>
+      <circle cx="100" cy="90" r="58" fill="#a8693f"/>
+      <path d="M44 84 Q40 30 100 30 Q162 28 156 84 Q150 62 128 58 Q118 72 100 62 Q82 74 70 60 Q52 64 44 84 Z" fill="#1a1a1a"/>
+    </g>
+
+    <!-- Generic kid (boy): shirt colour from `color` attribute -->
+    <g id="kid-boy" stroke="#1a1a1a" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+      <rect x="70" y="285" width="24" height="95" rx="8" fill="#b5784a"/>
+      <rect x="106" y="285" width="24" height="95" rx="8" fill="#b5784a"/>
+      <path d="M58 378 h40 a7 7 0 0 1 0 14 h-40 a7 7 0 0 1 0 -14z" fill="#3d3d3d"/>
+      <path d="M102 378 h40 a7 7 0 0 1 0 14 h-40 a7 7 0 0 1 0 -14z" fill="#3d3d3d"/>
+      <path d="M60 250 H140 L144 312 H104 L100 292 L96 312 H56 Z" fill="#34495e"/>
+      <rect x="88" y="138" width="24" height="28" fill="#b5784a"/>
+      <path d="M58 168 Q100 152 142 168 L170 200 L150 222 L142 210 L142 262 H58 L58 210 L50 222 L30 200 Z" fill="currentColor"/>
+      <circle cx="42" cy="96" r="12" fill="#b5784a"/>
+      <circle cx="158" cy="96" r="12" fill="#b5784a"/>
+      <circle cx="100" cy="90" r="58" fill="#b5784a"/>
+      <path d="M44 86 L48 46 L64 52 L72 30 L88 42 L100 24 L112 42 L128 30 L136 52 L152 46 L156 86 Q140 60 100 58 Q60 60 44 86 Z" fill="#1a1a1a"/>
+    </g>
+
+    <!-- Generic kid (girl, pavadai + plaits): dress colour from `color` attribute -->
+    <g id="kid-girl" stroke="#1a1a1a" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+      <rect x="72" y="300" width="22" height="80" rx="8" fill="#9c6239"/>
+      <rect x="106" y="300" width="22" height="80" rx="8" fill="#9c6239"/>
+      <path d="M58 378 h40 a7 7 0 0 1 0 14 h-40 a7 7 0 0 1 0 -14z" fill="#c0392b"/>
+      <path d="M102 378 h40 a7 7 0 0 1 0 14 h-40 a7 7 0 0 1 0 -14z" fill="#c0392b"/>
+      <path d="M50 92 Q34 150 42 214" fill="none" stroke-width="20"/>
+      <path d="M150 92 Q166 150 158 214" fill="none" stroke-width="20"/>
+      <circle cx="42" cy="220" r="9" fill="#e63946"/>
+      <circle cx="158" cy="220" r="9" fill="#e63946"/>
+      <rect x="88" y="138" width="24" height="28" fill="#9c6239"/>
+      <path d="M58 168 Q100 152 142 168 L170 200 L150 222 L142 210 L150 250 L174 320 H26 L50 250 L58 210 L50 222 L30 200 Z" fill="currentColor"/>
+      <path d="M30 304 H170 L174 320 H26 Z" fill="#ffd166"/>
+      <circle cx="100" cy="90" r="58" fill="#9c6239"/>
+      <path d="M42 94 Q36 28 100 30 Q164 28 158 94 Q150 60 100 58 Q50 60 42 94 Z" fill="#1a1a1a"/>
+      <circle cx="150" cy="52" r="6" fill="#fff" stroke-width="3"/>
+      <circle cx="158" cy="62" r="6" fill="#fff" stroke-width="3"/>
+      <circle cx="160" cy="74" r="6" fill="#fff" stroke-width="3"/>
+    </g>
+
+    <!-- Faces (same local box as the kids) -->
+    <g id="face-happy">
+      <ellipse cx="80" cy="92" rx="9" ry="12" fill="#fff" stroke="#1a1a1a" stroke-width="4"/>
+      <ellipse cx="120" cy="92" rx="9" ry="12" fill="#fff" stroke="#1a1a1a" stroke-width="4"/>
+      <circle cx="82" cy="95" r="5" fill="#1a1a1a"/>
+      <circle cx="122" cy="95" r="5" fill="#1a1a1a"/>
+      <circle cx="66" cy="116" r="8" fill="#ff7b7b" opacity=".55"/>
+      <circle cx="134" cy="116" r="8" fill="#ff7b7b" opacity=".55"/>
+      <path d="M80 116 Q100 142 120 116 Z" fill="#7a1f1f" stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round"/>
+    </g>
+    <g id="face-shocked">
+      <path d="M66 68 Q78 58 90 66 M110 66 Q122 58 134 68" fill="none" stroke="#1a1a1a" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="80" cy="92" r="14" fill="#fff" stroke="#1a1a1a" stroke-width="4"/>
+      <circle cx="120" cy="92" r="14" fill="#fff" stroke="#1a1a1a" stroke-width="4"/>
+      <circle cx="80" cy="93" r="4" fill="#1a1a1a"/>
+      <circle cx="120" cy="93" r="4" fill="#1a1a1a"/>
+      <ellipse cx="100" cy="128" rx="11" ry="15" fill="#7a1f1f" stroke="#1a1a1a" stroke-width="4"/>
+    </g>
+    <g id="face-proud">
+      <path d="M64 70 Q78 62 92 70 M108 70 Q122 62 136 70" fill="none" stroke="#1a1a1a" stroke-width="5" stroke-linecap="round"/>
+      <path d="M70 96 Q80 84 90 96 M110 96 Q120 84 130 96" fill="none" stroke="#1a1a1a" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="66" cy="114" r="8" fill="#ff7b7b" opacity=".55"/>
+      <circle cx="134" cy="114" r="8" fill="#ff7b7b" opacity=".55"/>
+      <path d="M76 112 Q100 146 124 112 Z" fill="#7a1f1f" stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M82 114 H118" stroke="#fff" stroke-width="5"/>
+    </g>
+    <g id="face-worried">
+      <path d="M66 64 Q78 70 90 66 M110 66 Q122 70 134 64" fill="none" stroke="#1a1a1a" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="80" cy="92" r="14" fill="#fff" stroke="#1a1a1a" stroke-width="4"/>
+      <circle cx="120" cy="92" r="14" fill="#fff" stroke="#1a1a1a" stroke-width="4"/>
+      <circle cx="80" cy="97" r="5" fill="#1a1a1a"/>
+      <circle cx="120" cy="97" r="5" fill="#1a1a1a"/>
+      <path d="M80 128 Q87 120 94 128 Q100 136 106 128 Q113 120 120 128" fill="none" stroke="#1a1a1a" stroke-width="5" stroke-linecap="round"/>
+      <path d="M166 40 Q178 58 172 66 Q164 72 158 64 Q156 54 166 40 Z" fill="#8fd6ff" stroke="#1a1a1a" stroke-width="3"/>
+    </g>
+
+    <!-- MANGO SELLER: white veshti, green towel, moustache. Local box 220 x 420 -->
+    <g id="seller" stroke="#1a1a1a" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+      <ellipse cx="82" cy="410" rx="24" ry="9" fill="#8a5a33"/>
+      <ellipse cx="138" cy="410" rx="24" ry="9" fill="#8a5a33"/>
+      <path d="M52 250 H168 L178 404 H42 Z" fill="#fff"/>
+      <path d="M45 386 H175" stroke="#d4a017" stroke-width="7"/>
+      <rect x="96" y="132" width="28" height="30" fill="#8a5a33"/>
+      <path d="M48 160 Q110 142 172 160 L200 205 L178 225 L170 212 L170 262 H50 L50 212 L42 225 L20 205 Z" fill="#f4a259"/>
+      <path d="M58 152 Q78 150 96 156 L84 272 L60 270 Z" fill="#3aa655"/>
+      <path d="M62 196 H90 M60 230 H86" stroke="#2a7a3e" stroke-width="4"/>
+      <circle cx="50" cy="92" r="12" fill="#8a5a33"/>
+      <circle cx="170" cy="92" r="12" fill="#8a5a33"/>
+      <circle cx="110" cy="85" r="60" fill="#8a5a33"/>
+      <path d="M52 92 Q46 34 104 26 Q170 26 168 92 Q162 66 150 56 Q140 64 130 50 Q110 60 92 50 Q80 64 66 58 Q56 70 52 92 Z" fill="#2b2b2b"/>
+      <path d="M78 74 Q88 68 98 74 M122 74 Q132 68 142 74" fill="none" stroke-width="5"/>
+      <circle cx="88" cy="88" r="5" fill="#1a1a1a"/>
+      <circle cx="132" cy="88" r="5" fill="#1a1a1a"/>
+      <path d="M76 116 Q92 102 110 112 Q128 102 144 116 Q128 124 110 118 Q92 124 76 116 Z" fill="#1a1a1a"/>
+      <path d="M98 128 Q110 136 122 128" fill="none" stroke-width="4"/>
+      <circle cx="110" cy="58" r="4" fill="#e63946" stroke="none"/>
+    </g>
+
+    <!-- One mango, centred on 0,0 -->
+    <g id="mango">
+      <path d="M0 -26 C22 -26 30 -6 26 10 C22 26 4 30 -10 26 C-28 20 -30 -4 -20 -16 C-14 -24 -8 -26 0 -26Z" fill="#ffb703" stroke="#1a1a1a" stroke-width="4"/>
+      <ellipse cx="10" cy="4" rx="11" ry="13" fill="#fb8500" opacity=".7"/>
+      <ellipse cx="-8" cy="-10" rx="5" ry="8" fill="#fff" opacity=".6"/>
+      <path d="M-2 -26 L-4 -34" stroke="#1a1a1a" stroke-width="4" stroke-linecap="round"/>
+      <path d="M-4 -33 Q8 -46 22 -38 Q8 -28 -4 -33 Z" fill="#52b788" stroke="#1a1a1a" stroke-width="3"/>
+    </g>
+
+    <!-- 9 mangoes (4-3-2): the pile after Kavin buys one -->
+    <g id="mango-pile-9">
+      <use href="#mango" x="36" y="-26"/><use href="#mango" x="92" y="-26"/><use href="#mango" x="148" y="-26"/><use href="#mango" x="204" y="-26"/>
+      <use href="#mango" x="64" y="-72"/><use href="#mango" x="120" y="-72"/><use href="#mango" x="176" y="-72"/>
+      <use href="#mango" x="92" y="-118"/><use href="#mango" x="148" y="-118"/>
+    </g>
+    <!-- Exactly 10 mangoes (4-3-2-1), sits on table top at y=0 -->
+    <g id="mango-pile">
+      <use href="#mango-pile-9"/>
+      <use href="#mango" x="120" y="-164"/>
+    </g>
+
+    <!-- Stall: back (poles + awning) and front (table). Origin = table top-left, width 360 -->
+    <g id="stall-back" stroke="#1a1a1a" stroke-width="5" stroke-linejoin="round">
+      <rect x="6" y="-330" width="16" height="330" fill="#8b5a2b"/>
+      <rect x="338" y="-330" width="16" height="330" fill="#8b5a2b"/>
+      <rect x="-20" y="-350" width="66.7" height="60" fill="#e63946"/>
+      <rect x="46.7" y="-350" width="66.7" height="60" fill="#fff"/>
+      <rect x="113.3" y="-350" width="66.7" height="60" fill="#e63946"/>
+      <rect x="180" y="-350" width="66.7" height="60" fill="#fff"/>
+      <rect x="246.7" y="-350" width="66.7" height="60" fill="#e63946"/>
+      <rect x="313.3" y="-350" width="66.7" height="60" fill="#fff"/>
+      <path d="M-20 -290 a33.35 33.35 0 0 0 66.7 0 Z" fill="#e63946"/>
+      <path d="M46.7 -290 a33.35 33.35 0 0 0 66.7 0 Z" fill="#fff"/>
+      <path d="M113.3 -290 a33.35 33.35 0 0 0 66.7 0 Z" fill="#e63946"/>
+      <path d="M180 -290 a33.35 33.35 0 0 0 66.7 0 Z" fill="#fff"/>
+      <path d="M246.7 -290 a33.35 33.35 0 0 0 66.7 0 Z" fill="#e63946"/>
+      <path d="M313.3 -290 a33.35 33.35 0 0 0 66.7 0 Z" fill="#fff"/>
+    </g>
+    <g id="stall-front" stroke="#1a1a1a" stroke-width="5" stroke-linejoin="round">
+      <rect x="0" y="0" width="360" height="180" fill="#c47f3a"/>
+      <path d="M0 60 H360 M0 120 H360" stroke-width="4"/>
+      <rect x="-12" y="-14" width="384" height="22" rx="4" fill="#8b5a2b"/>
+      <path d="M90 0 V180 M270 0 V180" stroke="#9b5f27" stroke-width="4"/>
+    </g>
+
+    <!-- Rupee note shape, centred on 0,0 -->
+    <g id="note">
+      <rect x="-40" y="-22" width="80" height="44" rx="4" fill="#9fd8a0" stroke="#1a1a1a" stroke-width="4"/>
+      <rect x="-32" y="-14" width="64" height="28" rx="3" fill="none" stroke="#4a9a5a" stroke-width="2"/>
+    </g>
+
+    <!-- Festival background, full 1080 panel -->
+    <g id="festival-bg">
+      <rect width="1080" height="1080" fill="#8fd6ff"/>
+      <g transform="translate(720,0)" stroke="#1a1a1a" stroke-width="5" stroke-linejoin="round">
+        <path d="M-150 820 L-130 640 H130 L150 820 Z" fill="#f4a259"/>
+        <path d="M-130 640 L-110 500 H110 L130 640 Z" fill="#f7b267"/>
+        <path d="M-110 500 L-88 380 H88 L110 500 Z" fill="#f4a259"/>
+        <path d="M-88 380 L-66 280 H66 L88 380 Z" fill="#f7b267"/>
+        <path d="M-80 280 Q0 196 80 280 Z" fill="#e76f51"/>
+        <circle cx="0" cy="210" r="12" fill="#ffd166"/>
+        <path d="M0 198 V178" />
+        <path d="M-34 820 V740 Q0 700 34 740 V820 Z" fill="#6b3410"/>
+        <path d="M-90 560 h20 v30 h-20z M70 560 h20 v30 h-20z M-60 430 h18 v26 h-18z M42 430 h18 v26 h-18z" fill="#6b3410"/>
+      </g>
+      <rect x="-5" y="810" width="1090" height="280" fill="#f6d39a" stroke="#1a1a1a" stroke-width="5"/>
+      <g fill="#fff" opacity=".9">
+        <circle cx="120" cy="900" r="5"/><circle cx="160" cy="900" r="5"/><circle cx="140" cy="930" r="5"/>
+        <circle cx="900" cy="960" r="5"/><circle cx="940" cy="960" r="5"/><circle cx="920" cy="990" r="5"/>
+      </g>
+      <path d="M-10 90 Q540 190 1090 90" fill="none" stroke="#1a1a1a" stroke-width="4"/>
+      <g stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round">
+        <path d="M19 99.5 L71 99.5 L45 149.5Z" fill="#e63946"/>
+        <path d="M129 115.5 L181 115.5 L155 165.5Z" fill="#ffd166"/>
+        <path d="M239 127.5 L291 127.5 L265 177.5Z" fill="#52b788"/>
+        <path d="M349 135.5 L401 135.5 L375 185.5Z" fill="#9b5de5"/>
+        <path d="M459 139.5 L511 139.5 L485 189.5Z" fill="#f15bb5"/>
+        <path d="M569 139.5 L621 139.5 L595 189.5Z" fill="#e63946"/>
+        <path d="M679 135.5 L731 135.5 L705 185.5Z" fill="#ffd166"/>
+        <path d="M789 127.5 L841 127.5 L815 177.5Z" fill="#52b788"/>
+        <path d="M899 115.5 L951 115.5 L925 165.5Z" fill="#9b5de5"/>
+        <path d="M1009 99.5 L1061 99.5 L1035 149.5Z" fill="#f15bb5"/>
+      </g>
+    </g>
+  </defs>
+</svg>
+
+<main class="comic">
+
+  <!-- TITLE CARD -->
+  <section class="panel title-card" aria-label="Title: Inflation">
+    <svg viewBox="0 0 1080 1080" aria-hidden="true">
+      <defs>
+        <pattern id="dots" width="36" height="36" patternUnits="userSpaceOnUse">
+          <circle cx="18" cy="18" r="7" fill="#ffb703"/>
+        </pattern>
+      </defs>
+      <rect width="1080" height="1080" fill="#ffd23f"/>
+      <rect width="1080" height="1080" fill="url(#dots)" opacity=".55"/>
+      <!-- rising price arrow -->
+      <path d="M90 990 L330 760 L300 735 L420 690 L390 810 L360 785 L120 1015 Z" fill="#e63946" stroke="#1a1a1a" stroke-width="7" stroke-linejoin="round"/>
+      <use href="#mango" transform="translate(220,830) scale(3)"/>
+      <g class="svgtxt" stroke="#1a1a1a" stroke-width="5">
+        <circle cx="500" cy="920" r="44" fill="#ffd166"/>
+        <circle cx="580" cy="975" r="44" fill="#ffd166"/>
+      </g>
+      <text x="500" y="938" text-anchor="middle" class="svgtxt" font-size="48" fill="#1a1a1a">₹</text>
+      <text x="580" y="993" text-anchor="middle" class="svgtxt" font-size="48" fill="#1a1a1a">₹</text>
+      <!-- Kavin waving -->
+      <g transform="translate(700,470) scale(1.35)">
+        <use href="#kavin"/><use href="#face-happy"/>
+        <path class="arm-o" d="M40 214 Q24 250 34 282"/><path class="arm-i" d="M40 214 Q24 250 34 282"/>
+        <circle class="hand" cx="34" cy="284" r="12"/>
+        <path class="arm-o" d="M160 214 Q200 172 190 112"/><path class="arm-i" d="M160 214 Q200 172 190 112"/>
+        <circle class="hand" cx="190" cy="110" r="13"/>
+        <path d="M212 84 Q228 100 222 122 M226 70 Q248 96 238 128" fill="none" stroke="#1a1a1a" stroke-width="5" stroke-linecap="round"/>
+      </g>
+    </svg>
+    <div class="kicker">CONCEPT TO COMICS</div>
+    <h1 class="big">INFLATION</h1>
+    <div class="sub">Kavin &amp; the mango stall 🥭</div>
+    <div class="setup">Kids 10-12 · Tamil Nadu · Tanglish</div>
+  </section>
+
+  <!-- PANEL 1: LAST YEAR. ₹10 buys 1 mango (9 left on the stall) -->
+  <section class="panel" aria-label="Panel 1: Last year, one mango costs 10 rupees">
+    <svg viewBox="0 0 1080 1080" aria-hidden="true">
+      <use href="#festival-bg"/>
+      <use href="#stall-back" transform="translate(60,640)"/>
+      <g transform="translate(254,370) scale(1.15)">
+        <use href="#seller"/>
+        <path class="arm-o" d="M189 215 L176 250"/><path class="arm-i s2" d="M189 215 L176 250"/>
+      </g>
+      <use href="#stall-front" transform="translate(60,640)"/>
+      <use href="#mango-pile-9" transform="translate(60,640)"/>
+      <!-- seller holds up Kavin's ₹10 -->
+      <g transform="translate(254,370) scale(1.15)">
+        <path class="arm-o" d="M31 215 Q-4 170 14 104"/><path class="arm-i s2" d="M31 215 Q-4 170 14 104"/>
+        <g transform="translate(14,78) rotate(-8)"><use href="#note"/><text y="9" text-anchor="middle" class="svgtxt" font-size="24">₹10</text></g>
+        <circle class="hand s2" cx="14" cy="102" r="12"/>
+      </g>
+      <!-- price board -->
+      <rect x="552" y="575" width="16" height="240" fill="#8b5a2b" stroke="#1a1a1a" stroke-width="5"/>
+      <rect x="470" y="400" width="180" height="180" rx="12" fill="#fff3c4" stroke="#1a1a1a" stroke-width="6"/>
+      <text x="560" y="462" text-anchor="middle" class="svgtxt" font-size="40" fill="#1a1a1a">Mango</text>
+      <text x="560" y="545" text-anchor="middle" class="svgtxt" font-size="66" fill="#2a7a3e">₹10</text>
+      <!-- Kavin, happy, holding his 1 mango -->
+      <g transform="translate(760,300) scale(1.3)">
+        <use href="#kavin"/><use href="#face-happy"/>
+        <path class="arm-o" d="M40 214 Q28 250 36 282"/><path class="arm-i" d="M40 214 Q28 250 36 282"/>
+        <circle class="hand" cx="36" cy="284" r="12"/>
+        <path class="arm-o" d="M160 214 Q196 180 188 134"/><path class="arm-i" d="M160 214 Q196 180 188 134"/>
+        <use href="#mango" transform="translate(190,100) scale(1.35)"/>
+        <circle class="hand" cx="188" cy="132" r="12"/>
+      </g>
+    </svg>
+    <div class="when"><b>1 · Pona varusham</b><small>Last year</small></div>
+    <div class="bubble" style="right:3%; top:12%; width:44%; --tail:62%; --tip:50%">Superb! ₹10-ku oru mango!</div>
+  </section>
+
+  <!-- PANEL 2: THIS YEAR. Every kid (Kavin too) has ₹20 -->
+  <section class="panel" aria-label="Panel 2: This year, every kid gets double pocket money, 20 rupees">
+    <svg viewBox="0 0 1080 1080" aria-hidden="true">
+      <use href="#festival-bg"/>
+      <!-- other kids in the background, each with ₹20 -->
+      <g transform="translate(470,476) scale(0.8)">
+        <use href="#kid-girl" color="#f15bb5"/><use href="#face-happy"/>
+        <path class="arm-o" d="M40 214 Q22 244 30 270"/><path class="arm-i" d="M40 214 Q22 244 30 270"/><circle class="hand" cx="30" cy="272" r="12"/>
+        <path class="arm-o" d="M160 214 Q190 170 180 122"/><path class="arm-i" d="M160 214 Q190 170 180 122"/>
+        <g transform="translate(180,94) rotate(-10)"><use href="#note"/><text y="9" text-anchor="middle" class="svgtxt" font-size="24">₹20</text></g>
+        <circle class="hand" cx="180" cy="120" r="12"/>
+      </g>
+      <g transform="translate(620,470) scale(0.8)">
+        <use href="#kid-boy" color="#52b788"/><use href="#face-happy"/>
+        <path class="arm-o" d="M40 214 Q22 244 30 270"/><path class="arm-i" d="M40 214 Q22 244 30 270"/><circle class="hand" cx="30" cy="272" r="12"/>
+        <path class="arm-o" d="M160 214 Q190 170 180 122"/><path class="arm-i" d="M160 214 Q190 170 180 122"/>
+        <g transform="translate(180,94) rotate(8)"><use href="#note"/><text y="9" text-anchor="middle" class="svgtxt" font-size="24">₹20</text></g>
+        <circle class="hand" cx="180" cy="120" r="12"/>
+      </g>
+      <g transform="translate(770,476) scale(0.8)">
+        <use href="#kid-girl" color="#9b5de5"/><use href="#face-happy"/>
+        <path class="arm-o" d="M40 214 Q22 244 30 270"/><path class="arm-i" d="M40 214 Q22 244 30 270"/><circle class="hand" cx="30" cy="272" r="12"/>
+        <path class="arm-o" d="M160 214 Q190 170 180 122"/><path class="arm-i" d="M160 214 Q190 170 180 122"/>
+        <g transform="translate(180,94) rotate(-6)"><use href="#note"/><text y="9" text-anchor="middle" class="svgtxt" font-size="24">₹20</text></g>
+        <circle class="hand" cx="180" cy="120" r="12"/>
+      </g>
+      <g transform="translate(910,470) scale(0.8)">
+        <use href="#kid-boy" color="#f77f00"/><use href="#face-happy"/>
+        <path class="arm-o" d="M40 214 Q12 176 22 122"/><path class="arm-i" d="M40 214 Q12 176 22 122"/>
+        <g transform="translate(22,94) rotate(10)"><use href="#note"/><text y="9" text-anchor="middle" class="svgtxt" font-size="24">₹20</text></g>
+        <circle class="hand" cx="22" cy="120" r="12"/>
+        <path class="arm-o" d="M160 214 Q178 244 170 270"/><path class="arm-i" d="M160 214 Q178 244 170 270"/><circle class="hand" cx="170" cy="272" r="12"/>
+      </g>
+      <!-- Kavin in front, proudly holding his ₹20 -->
+      <g transform="translate(140,380) scale(1.2)">
+        <use href="#kavin"/><use href="#face-happy"/>
+        <path class="arm-o" d="M40 214 Q28 250 36 282"/><path class="arm-i" d="M40 214 Q28 250 36 282"/>
+        <circle class="hand" cx="36" cy="284" r="12"/>
+        <path class="arm-o" d="M160 214 Q196 180 188 130"/><path class="arm-i" d="M160 214 Q196 180 188 130"/>
+        <g transform="translate(188,100) rotate(-10)"><use href="#note"/><text y="9" text-anchor="middle" class="svgtxt" font-size="24">₹20</text></g>
+        <circle class="hand" cx="188" cy="128" r="12"/>
+      </g>
+    </svg>
+    <div class="when now"><b>2 · Indha varusham</b><small>This year</small></div>
+    <div class="think" style="left:40%; right:4%; top:17%; --tx:4%">Indha thadava 2 mango!
+      <svg class="mini" viewBox="-40 -48 160 84" aria-hidden="true"><use href="#mango"/><use href="#mango" x="80"/></svg>
+    </div>
+    <div class="caption" style="left:4%; right:4%; bottom:3.5%">Ellaa pasangalukkum <span class="hl">DOUBLE</span> pocket money: ₹20!</div>
+  </section>
+
+  <!-- PANEL 3: THIS YEAR. Same 10 mangoes, everyone has more money, price ₹20 -->
+  <section class="panel" aria-label="Panel 3: Price goes up to 20 rupees, Kavin can buy only one mango">
+    <svg viewBox="0 0 1080 1080" aria-hidden="true">
+      <use href="#festival-bg"/>
+      <use href="#stall-back" transform="translate(60,640)"/>
+      <g transform="translate(254,370) scale(1.15)">
+        <use href="#seller"/>
+        <path class="arm-o" d="M31 215 L44 250"/><path class="arm-i s2" d="M31 215 L44 250"/>
+      </g>
+      <use href="#stall-front" transform="translate(60,640)"/>
+      <use href="#mango-pile" transform="translate(60,640)"/>
+      <!-- crowd behind Kavin, all with ₹20 -->
+      <g transform="translate(610,410) scale(0.95)">
+        <use href="#kid-girl" color="#f15bb5"/><use href="#face-happy"/>
+        <path class="arm-o" d="M160 214 Q190 170 180 122"/><path class="arm-i" d="M160 214 Q190 170 180 122"/>
+        <g transform="translate(180,94) rotate(-10)"><use href="#note"/><text y="9" text-anchor="middle" class="svgtxt" font-size="24">₹20</text></g>
+        <circle class="hand" cx="180" cy="120" r="12"/>
+      </g>
+      <g transform="translate(900,400) scale(0.95)">
+        <use href="#kid-boy" color="#52b788"/><use href="#face-happy"/>
+        <path class="arm-o" d="M40 214 Q12 176 22 122"/><path class="arm-i" d="M40 214 Q12 176 22 122"/>
+        <g transform="translate(22,94) rotate(10)"><use href="#note"/><text y="9" text-anchor="middle" class="svgtxt" font-size="24">₹20</text></g>
+        <circle class="hand" cx="22" cy="120" r="12"/>
+      </g>
+      <!-- price board: ₹10 crossed out, ₹20 written -->
+      <rect x="552" y="585" width="16" height="230" fill="#8b5a2b" stroke="#1a1a1a" stroke-width="5"/>
+      <rect x="465" y="395" width="190" height="195" rx="12" fill="#fff3c4" stroke="#1a1a1a" stroke-width="6"/>
+      <text x="560" y="445" text-anchor="middle" class="svgtxt" font-size="38" fill="#1a1a1a">Mango</text>
+      <text x="560" y="500" text-anchor="middle" class="svgtxt" font-size="42" fill="#9a9a9a">₹10</text>
+      <path d="M512 486 L610 476" stroke="#e63946" stroke-width="8" stroke-linecap="round"/>
+      <text x="560" y="568" text-anchor="middle" class="svgtxt" font-size="62" fill="#e63946">₹20</text>
+      <!-- seller's arm writing on the board -->
+      <g transform="translate(254,370) scale(1.15)">
+        <path class="arm-o" d="M189 215 Q232 170 205 102"/><path class="arm-i s2" d="M189 215 Q232 170 205 102"/>
+        <rect x="200" y="76" width="10" height="22" rx="3" fill="#fff" stroke="#1a1a1a" stroke-width="3" transform="rotate(20 205 87)"/>
+        <circle class="hand s2" cx="205" cy="102" r="12"/>
+      </g>
+      <!-- Kavin, shocked, holding his ₹20 -->
+      <g transform="translate(720,340) scale(1.2)">
+        <use href="#kavin"/><use href="#face-shocked"/>
+        <path class="arm-o" d="M40 214 Q12 172 46 130"/><path class="arm-i" d="M40 214 Q12 172 46 130"/>
+        <circle class="hand" cx="46" cy="128" r="12"/>
+        <path class="arm-o" d="M160 214 Q186 250 172 280"/><path class="arm-i" d="M160 214 Q186 250 172 280"/>
+        <g transform="translate(176,296) rotate(8)"><use href="#note"/><text y="9" text-anchor="middle" class="svgtxt" font-size="24">₹20</text></g>
+        <circle class="hand" cx="172" cy="282" r="12"/>
+        <path d="M168 34 Q180 52 174 60 Q166 66 160 58 Q158 48 168 34 Z" fill="#8fd6ff" stroke="#1a1a1a" stroke-width="3"/>
+        <path d="M22 40 L8 26 M30 26 L24 8 M178 76 L196 70" stroke="#1a1a1a" stroke-width="5" stroke-linecap="round"/>
+      </g>
+    </svg>
+    <div class="when now"><b>3 · Indha varusham</b><small>This year</small></div>
+    <div class="bubble" style="right:2%; top:4%; width:46%; --tail:50%; --tip:55%">Aiyo! ₹20-ku oru mango dhaan!
+      <svg class="mini" viewBox="-40 -48 160 84" aria-hidden="true">
+        <use href="#mango"/>
+        <g opacity=".35"><use href="#mango" x="80"/></g>
+        <path d="M56 -30 L104 22 M104 -30 L56 22" stroke="#e63946" stroke-width="9" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="caption" style="left:4%; right:4%; bottom:3.5%">Kaasu double aachu. Aana mango <span class="hl">pona varusham alavu dhaan!</span></div>
+  </section>
+
+  <!-- PANEL 4: the reveal -->
+  <section class="panel" aria-label="Panel 4: This is inflation">
+    <svg viewBox="0 0 1080 1080" aria-hidden="true">
+      <rect width="1080" height="1080" fill="#ffe9c7"/>
+      <rect x="-5" y="800" width="1090" height="290" fill="#e0b07a" stroke="#1a1a1a" stroke-width="5"/>
+      <rect x="50" y="190" width="980" height="590" rx="10" fill="#8b5a2b" stroke="#1a1a1a" stroke-width="6"/>
+      <rect x="72" y="212" width="936" height="546" fill="#2f5d46" stroke="#1a1a1a" stroke-width="4"/>
+      <!-- Row 1: mango = goods -->
+      <use href="#mango" transform="translate(140,282) scale(1.15)"/>
+      <text x="196" y="300" class="svgtxt chalk" font-size="50">Mango = <tspan fill="#ffe14d">Goods</tspan></text>
+      <!-- Row 2: pocket money = money in the economy -->
+      <use href="#note" transform="translate(140,392) scale(.9)"/>
+      <text x="140" y="400" text-anchor="middle" class="svgtxt" font-size="22" fill="#1a1a1a">₹</text>
+      <text x="196" y="394" class="svgtxt chalk" font-size="46">Pocket money =</text>
+      <text x="196" y="446" class="svgtxt" font-size="40" fill="#ffe14d">Money in the economy</text>
+      <!-- Row 3: mango price ₹10 -> ₹20 = Inflation -->
+      <text x="110" y="540" class="svgtxt chalk" font-size="44">Mango price:</text>
+      <text x="110" y="612" class="svgtxt chalk" font-size="58">₹10</text>
+      <path d="M225 594 H315 M295 574 L320 594 L295 614" fill="none" stroke="#fdfdf5" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="335" y="612" class="svgtxt" font-size="58" fill="#ff8fa0">₹20</text>
+      <path d="M478 622 V558 M458 578 L478 556 L498 578" fill="none" stroke="#ff8fa0" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="110" y="700" class="svgtxt" font-size="60" fill="#ffe14d">= Inflation!</text>
+      <path d="M112 718 Q260 706 420 718" fill="none" stroke="#ffe14d" stroke-width="5" stroke-linecap="round"/>
+      <!-- Kavin the teacher -->
+      <g transform="translate(800,400) scale(1.1)">
+        <use href="#kavin"/><use href="#face-proud"/>
+        <path d="M-10 190 L-300 260" stroke="#1a1a1a" stroke-width="16" stroke-linecap="round"/>
+        <path d="M-10 190 L-300 260" stroke="#c47f3a" stroke-width="8" stroke-linecap="round"/>
+        <path class="arm-o" d="M40 214 Q18 200 -6 192"/><path class="arm-i" d="M40 214 Q18 200 -6 192"/>
+        <circle class="hand" cx="-8" cy="191" r="12"/>
+        <path class="arm-o" d="M160 214 Q192 240 160 262"/><path class="arm-i" d="M160 214 Q192 240 160 262"/>
+      </g>
+    </svg>
+    <h2 class="reveal-title big">4 · Idhu dhaan Inflation!</h2>
+    <div class="caption" style="left:4%; right:4%; bottom:3.5%">Kaasu double. Mango adhe. So rupee-oda value <span class="hl">kammi</span>.</div>
+  </section>
+
+  <!-- PANEL 5: takeaway. Last year's ₹10 can't buy a mango now -->
+  <section class="panel" aria-label="Panel 5: Takeaway, money kept idle loses its power">
+    <svg viewBox="0 0 1080 1080" aria-hidden="true">
+      <rect width="1080" height="1080" fill="#ffd166"/>
+      <g transform="translate(540,620)" fill="#ffe599">
+        <path d="M0 0 L-110 -900 L110 -900 Z"/>
+        <path d="M0 0 L-110 -900 L110 -900 Z" transform="rotate(45)"/>
+        <path d="M0 0 L-110 -900 L110 -900 Z" transform="rotate(90)"/>
+        <path d="M0 0 L-110 -900 L110 -900 Z" transform="rotate(135)"/>
+        <path d="M0 0 L-110 -900 L110 -900 Z" transform="rotate(180)"/>
+        <path d="M0 0 L-110 -900 L110 -900 Z" transform="rotate(225)"/>
+        <path d="M0 0 L-110 -900 L110 -900 Z" transform="rotate(270)"/>
+        <path d="M0 0 L-110 -900 L110 -900 Z" transform="rotate(315)"/>
+      </g>
+      <rect x="-5" y="870" width="1090" height="220" fill="#e9c46a" stroke="#1a1a1a" stroke-width="5"/>
+      <!-- Last year vs now cards -->
+      <g transform="translate(185,620) rotate(-4)">
+        <rect x="-140" y="-82" width="280" height="164" rx="14" fill="#fff" stroke="#1a1a1a" stroke-width="6"/>
+        <text y="-34" text-anchor="middle" class="svgtxt" font-size="38" fill="#e63946">Pona varusham</text>
+        <text x="-30" y="44" text-anchor="middle" class="svgtxt" font-size="50" fill="#1a1a1a">₹10 =</text>
+        <use href="#mango" transform="translate(80,28) scale(1.1)"/>
+      </g>
+      <g transform="translate(895,620) rotate(4)">
+        <rect x="-140" y="-82" width="280" height="164" rx="14" fill="#fff" stroke="#1a1a1a" stroke-width="6"/>
+        <text y="-34" text-anchor="middle" class="svgtxt" font-size="38" fill="#2f7de1">Ippo</text>
+        <text x="-30" y="44" text-anchor="middle" class="svgtxt" font-size="50" fill="#1a1a1a">₹10 =</text>
+        <g opacity=".35"><use href="#mango" transform="translate(80,28) scale(1.1)"/></g>
+        <path d="M56 0 L104 52 M104 0 L56 52" stroke="#e63946" stroke-width="10" stroke-linecap="round"/>
+      </g>
+      <!-- puddle with coins -->
+      <ellipse cx="540" cy="925" rx="190" ry="32" fill="#d9734f" stroke="#1a1a1a" stroke-width="5"/>
+      <g stroke="#1a1a1a" stroke-width="4" fill="#ffd23f">
+        <ellipse cx="440" cy="922" rx="20" ry="9"/>
+        <ellipse cx="640" cy="928" rx="20" ry="9"/>
+        <ellipse cx="560" cy="938" rx="18" ry="8"/>
+      </g>
+      <!-- Kavin -->
+      <g transform="translate(400,330) scale(1.4)">
+        <use href="#kavin"/><use href="#face-worried"/>
+      </g>
+      <!-- melting undiyal (clay money pot) -->
+      <path d="M508 618 L514 588 H566 L572 618 Z" fill="#c8553d" stroke="#1a1a1a" stroke-width="5" stroke-linejoin="round"/>
+      <ellipse cx="540" cy="588" rx="34" ry="10" fill="#a8432f" stroke="#1a1a1a" stroke-width="5"/>
+      <path d="M526 587 H554" stroke="#1a1a1a" stroke-width="6" stroke-linecap="round"/>
+      <path d="M445 700 C445 640 490 610 540 610 C590 610 635 640 635 700 C635 740 625 760 612 772 L612 830 Q604 846 596 830 L594 790 C580 800 570 802 560 803 L560 865 Q550 882 540 865 L540 805 C520 804 505 800 492 792 L490 818 Q482 832 474 818 L474 776 C455 760 445 735 445 700 Z" fill="#c8553d" stroke="#1a1a1a" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M478 662 Q492 636 520 628" fill="none" stroke="#f2a48f" stroke-width="10" stroke-linecap="round"/>
+      <path d="M500 900 Q492 888 500 878 Q508 888 500 900 Z M590 888 Q582 876 590 866 Q598 876 590 888 Z" fill="#c8553d" stroke="#1a1a1a" stroke-width="3"/>
+      <!-- Kavin's hands on the pot -->
+      <g transform="translate(400,330) scale(1.4)">
+        <path class="arm-o" d="M40 214 Q22 240 32 262"/><path class="arm-i" d="M40 214 Q22 240 32 262"/>
+        <circle class="hand" cx="32" cy="264" r="12"/>
+        <path class="arm-o" d="M160 214 Q178 240 168 262"/><path class="arm-i" d="M160 214 Q178 240 168 262"/>
+        <circle class="hand" cx="168" cy="264" r="12"/>
+      </g>
+      <!-- heat squiggles -->
+      <path d="M400 540 q12 -16 0 -32 q-12 -16 0 -32 M680 540 q12 -16 0 -32 q-12 -16 0 -32" fill="none" stroke="#e76f51" stroke-width="7" stroke-linecap="round"/>
+    </svg>
+    <div class="tag">5 · Takeaway</div>
+    <div class="bubble" style="left:6%; right:6%; top:11%; --tail:44%; --tip:50%">Kaasa summa vechaa, adhoda power <span class="hl">mella mella urugum!</span></div>
+  </section>
+
+</main>
+
+<footer><span>Made with Concept to Comics</span></footer>
+
+</body>
+</html>
