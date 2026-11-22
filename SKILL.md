@@ -125,8 +125,8 @@ By default give A, D, E, F in that order, then the menu line. Give B or C only w
 Use exactly this format, inside one code block. People read it, AND the free viewer draws it, so keep the key words (`COMIC:`, `PANEL 1 -`, `Show:` ...) as they are. Optional lines can be left out.
 
 ```
-COMIC: [concept]
-Subtitle: [one fun line]
+COMIC: [concept, max 4 words, e.g. "EMI" not "EMI - Equated Monthly Installment"]
+Subtitle: [one fun line, max 8 words; spell out the full name here if needed]
 For: [audience] · [culture] · [language]
 Characters: [Name] = [boy/girl/man/woman/grandma/grandpa], [shirt colour], [light/medium/brown/dark skin], [extras: glasses, moustache, beard, saree, veshti, hijab, bindi, hair puff, plaits, bun] | [Name] = ...
 

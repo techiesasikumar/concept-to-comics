@@ -75,22 +75,27 @@
   .think::before { width: 4.2cqw; height: 4.2cqw; left: var(--tail, 50%); top: calc(100% + 1cqw); }
   .think::after  { width: 2.6cqw; height: 2.6cqw; left: calc(var(--tail, 50%) + var(--dir, 1) * 3.6cqw); top: calc(100% + 6cqw); }
   .who { display: block; font-size: 3cqw; color: #666; margin-bottom: .4cqw; }
+  /* Title card: text stacks top-down with fixed gaps, so lines never overlap */
+  .title-card .tc {
+    position: absolute; z-index: 2; top: 4.5cqw; left: 5%; right: 5%;
+    display: flex; flex-direction: column; align-items: center; gap: 2.6cqw; text-align: center;
+  }
   .title-card h1 {
-    position: absolute; top: 13cqw; left: 3%; right: 3%; margin: 0; text-align: center;
-    font-family: "Bangers", cursive; font-weight: 400; letter-spacing: .03em; line-height: 1;
-    color: var(--red); -webkit-text-stroke: .45cqw var(--ink); text-shadow: 1.1cqw 1.1cqw 0 var(--ink);
+    margin: 0; width: 100%; text-align: center; overflow-wrap: break-word;
+    font-family: "Bangers", cursive; font-weight: 400; letter-spacing: .03em; line-height: 1.04;
+    color: var(--red); -webkit-text-stroke: .024em var(--ink); text-shadow: .055em .055em 0 var(--ink);
   }
   .title-card .kicker {
-    position: absolute; top: 4.5cqw; left: 50%; transform: translateX(-50%) rotate(-2deg);
-    background: var(--ink); color: var(--yellow); font-size: 3.6cqw; padding: 1.3cqw 3cqw; white-space: nowrap;
+    transform: rotate(-2deg); background: var(--ink); color: var(--yellow);
+    font-size: 3.6cqw; padding: 1.3cqw 3cqw; white-space: nowrap;
   }
   .title-card .sub {
-    position: absolute; left: 8%; right: 8%; transform: rotate(1deg); text-align: center;
-    background: #fff; border: .6cqw solid var(--ink); box-shadow: .9cqw .9cqw 0 var(--ink);
-    font-size: 4.8cqw; padding: 1.6cqw 3cqw;
+    max-width: 100%; transform: rotate(1deg); background: #fff;
+    border: .6cqw solid var(--ink); box-shadow: .9cqw .9cqw 0 var(--ink);
+    font-size: 4.8cqw; line-height: 1.2; padding: 1.6cqw 3cqw;
   }
   .title-card .setup {
-    position: absolute; left: 50%; transform: translateX(-50%); font-size: 3.3cqw; white-space: nowrap;
+    max-width: 100%; font-size: 3.3cqw; line-height: 1.25;
     background: rgba(255,255,255,.88); padding: .8cqw 2.4cqw; border-radius: 3cqw;
   }
   .sheet { background: #fff; }
@@ -681,13 +686,24 @@ function titleEl(c) {
   const sec = document.createElement("section");
   sec.className = "panel title-card";
   const t = c.title || "My Comic";
-  const fs = clamp(150 / Math.max(4, t.length) * 1.1, 8, 21);
-  sec.innerHTML = `<div class="kicker">CONCEPT TO COMICS</div><h1 style="font-size:${fs}cqw">${esc(t)}</h1>` +
-    (c.subtitle ? `<div class="sub" style="top:${13 + fs * 1.15}cqw">${esc(c.subtitle)}</div>` : "") +
-    (c.setup ? `<div class="setup" style="top:${23 + fs * 1.15}cqw">${esc(c.setup)}</div>` : "");
+  sec.innerHTML = `<div class="tc"><div class="kicker">CONCEPT TO COMICS</div><h1>${esc(t)}</h1>` +
+    (c.subtitle ? `<div class="sub">${esc(c.subtitle)}</div>` : "") +
+    (c.setup ? `<div class="setup">${esc(c.setup)}</div>` : "") + `</div>`;
   sec._layout = () => {
+    // Shrink the title until it fits in at most 2 lines without breaking words,
+    // and the whole text block stays in the top ~55% (room for the characters).
+    const W = sec.clientWidth, U = 1080 / W, h1 = sec.querySelector("h1"), tc = sec.querySelector(".tc");
+    let fs = 21;
+    for (; fs > 10; fs -= .5) {
+      h1.style.fontSize = fs + "cqw";
+      const lines = Math.round(h1.offsetHeight / (fs / 100 * W * 1.04));
+      const wordFits = h1.scrollWidth <= h1.clientWidth + 1 && ![...t.split(/\s+/)].some(wd => textW(wd, fs / 100 * W) * .82 > h1.clientWidth);
+      if (lines <= 2 && wordFits && (tc.offsetTop + tc.offsetHeight) * U <= 660) break;
+    }
+    const textBottom = (tc.offsetTop + tc.offsetHeight) * U;
     const cast = c.chars.slice(0, 4);
-    const feet = 1040, n = Math.max(1, cast.length), w = 900 / n, base = clamp(Math.min(430 / (392 * 1.12), w / 215), .5, 1.2);
+    const feet = 1040, n = Math.max(1, cast.length), w = 900 / n;
+    const base = clamp(Math.min((feet - textBottom - 40) / (392 * 1.12), w / 215), .45, 1.2);
     let svg = `<defs><pattern id="td" width="36" height="36" patternUnits="userSpaceOnUse"><circle cx="18" cy="18" r="7" fill="#ffb703"/></pattern></defs><rect width="1080" height="1080" fill="#ffd23f"/><rect width="1080" height="1080" fill="url(#td)" opacity=".5"/>`;
     cast.forEach((ch, i) => {
       const sc = base * (ch.adult ? 1.12 : 1), cx = 90 + w * (i + .5);
