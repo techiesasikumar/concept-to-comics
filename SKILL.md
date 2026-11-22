@@ -54,8 +54,8 @@ Many people use free plans with small limits. Default to the short output, and m
 - **On a change request, redo only what changed** (e.g. just panel 3, or just the language). Do not repeat unchanged panels or tables.
 - No long intros, no recaps, no explaining your steps. The silent steps stay silent.
 
-Menu (end every comic with it, one line):
-> 🎨 See it drawn for free: copy everything from COMIC to "Where it breaks" and paste it into https://techiesasikumar.github.io/concept-to-comics/viewer/
+Menu (end every comic with it, AFTER `===COMIC END===` and outside the code block, never inside the markers):
+> 🎨 See it drawn for free: copy the whole code block and paste it into https://techiesasikumar.github.io/concept-to-comics/viewer/
 > Want more? Reply **draw** (I draw a custom page, uses more of your chat limit) · **prompts** (image prompts for ChatGPT/Gemini images) · or tell me what to change.
 
 ---
@@ -127,6 +127,7 @@ By default give A, D, E, F in that order, then the menu line. Give B or C only w
 Use exactly this format, inside one code block. People read it, AND the free viewer draws it, so keep the key words (`COMIC:`, `PANEL 1 -`, `Show:` ...) as they are. Optional lines can be left out.
 
 ```
+===COMIC START===
 COMIC: [concept, max 4 words, e.g. "EMI" not "EMI - Equated Monthly Installment"]
 Subtitle: [one fun line, max 8 words; spell out the full name here if needed]
 For: [audience] · [culture] · [language]
@@ -142,7 +143,16 @@ Board: [line] | [line] | [line]
 Caption: [narrator text]
 [Name]: "[speech bubble]"
 [Name] (thinks): "[thought bubble]"
+
+| In the comic | In real life |
+|---|---|
+| ... | ... |
+
+Where it breaks: [one honest line]
+===COMIC END===
 ```
+- The code block holds ONLY the comic: from `===COMIC START===` to `===COMIC END===`, each marker on its own line. Instructions for the person (the viewer link, the menu) go after `===COMIC END===`, outside the code block. Never put links or instructions inside the markers.
+- Max 2 speech/thought bubbles per panel. Every speech line is `Name: "text"` with a character from `Characters`, and the text is never empty. Put narration in `Caption`, not in a speech line.
 - `Things` and `Board` draw exactly what you write: 🥭 x10 draws 10 mangoes. In signs, `~~₹10~~ ₹20` shows ₹10 crossed out. Use `Board` (a chalkboard) for the reveal panel's mapping.
 - Use emoji for objects (🥭 💵 🦠 🌱 📱). Keep sign text short (max ~5 words).
 
@@ -162,15 +172,15 @@ If you can produce HTML, SVG or an artifact/canvas: make ONE self-contained HTML
 - Keep any in-image text to 5 words or less (image models often misspell longer text). Tell the user they can add captions afterwards.
 
 ### D) Mapping table
-Put it in the same code block, right after the panels (the viewer turns it into a cheat sheet).
+Put it in the same code block, right after the panels and before `===COMIC END===` (the viewer turns it into a cheat sheet). No heading line above it.
 | In the comic | In real life |
 |---|---|
 
 ### E) Where this analogy breaks
-One honest line, also in the code block, starting with `Where it breaks:`. Say what the analogy does NOT capture. This builds trust and stops wrong lessons.
+One honest line, the last line before `===COMIC END===`, starting with `Where it breaks:`. Say what the analogy does NOT capture. This builds trust and stops wrong lessons.
 
 ### F) Next comics
-2-3 related concepts the reader could ask for next.
+2-3 related concepts the reader could ask for next, after the code block (outside the markers).
 
 ---
 
@@ -178,6 +188,7 @@ One honest line, also in the code block, starting with `Where it breaks:`. Say w
 
 - [ ] Audience, culture and language came from the person, not guessed.
 - [ ] Short output only (A, D, E, F + menu), unless they asked for "draw" or "prompts".
+- [ ] The comic sits between `===COMIC START===` and `===COMIC END===`; links and instructions are outside; max 2 bubbles per panel, none empty.
 - [ ] WHAT, WHY and SO WHAT are all in the comic.
 - [ ] Every row in the mapping table is factually true.
 - [ ] Realistic: every part the real thing always has is in the comic (e.g. EMI includes interest), with realistic, rounded numbers.

@@ -22,6 +22,7 @@ Panel 3's caption has no number on purpose: a "10" next to the ₹10 → ₹20 b
 🎨 Paste this whole block into the [free viewer](https://techiesasikumar.github.io/concept-to-comics/viewer/) to see it drawn.
 
 ```
+===COMIC START===
 COMIC: Inflation
 Subtitle: Kavin & the mango stall
 For: Kids 10-12 · Tamil Nadu · Tanglish
@@ -75,6 +76,7 @@ Kavin: "Kaasa summa vechaa, adhoda power mella mella urugum!"
 | Last year's ₹10 can't buy a mango now | Savings lose buying power |
 
 Where it breaks: Real inflation has many causes (higher costs, fuel prices, supply problems), not only extra money. And real prices rarely move exactly in step with money. In India prices usually rise about 4-6% a year, not double; the ₹10 → ₹20 jump just makes the idea easy to see.
+===COMIC END===
 ```
 
 ## Image prompts

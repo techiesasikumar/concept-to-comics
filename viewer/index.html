@@ -60,11 +60,12 @@
   .caption {
     position: absolute; z-index: 2; left: 4%; right: 4%; bottom: 3.5%; background: var(--yellow);
     border: .6cqw solid var(--ink); box-shadow: .9cqw .9cqw 0 var(--ink); padding: 2cqw 3cqw;
-    font-size: 4.4cqw; line-height: 1.22;
+    font-size: 4.4cqw; line-height: 1.22; overflow-wrap: anywhere; word-break: break-word;
   }
   .bubble, .think {
     position: absolute; z-index: 3; background: #fff; border: .6cqw solid var(--ink);
     padding: 2.2cqw 3.4cqw; font-size: 4.6cqw; line-height: 1.2; text-align: center;
+    overflow-wrap: anywhere; word-break: break-word;
   }
   .bubble { border-radius: 7cqw; }
   .bubble::before, .bubble::after { content: ""; position: absolute; top: 100%; left: var(--tail, 50%); width: 6cqw; height: 7cqw; }
@@ -148,7 +149,8 @@
 
 <script>
 "use strict";
-const EXAMPLE = `COMIC: Inflation
+const EXAMPLE = `===COMIC START===
+COMIC: Inflation
 Subtitle: Kavin & the mango stall
 For: Kids 10-12 · Tamil Nadu · Tanglish
 Characters: Kavin = boy, 10, blue shirt, brown skin | Seller = man, orange shirt, white veshti, moustache, brown skin
@@ -195,7 +197,8 @@ Kavin: "Kaasa summa vechaa, adhoda power mella mella urugum!"
 | Last year → this year | Inflation happens over time |
 | Last year's ₹10 can't buy a mango now | Savings lose buying power |
 
-Where it breaks: Real inflation has many causes (costs, fuel, supply), not only extra money, and prices rarely move exactly in step with money. In India prices usually rise about 4-6% a year, not double; doubling just makes the idea easy to see.`;
+Where it breaks: Real inflation has many causes (costs, fuel, supply), not only extra money, and prices rarely move exactly in step with money. In India prices usually rise about 4-6% a year, not double; doubling just makes the idea easy to see.
+===COMIC END===`;
 
 /* ---------- helpers ---------- */
 const $ = s => document.querySelector(s);
@@ -216,14 +219,52 @@ function splitTop(s, sep) {
   return out;
 }
 const KEYS = ["comic", "title", "subtitle", "for", "setup", "characters", "cast", "place", "show", "things", "label", "when", "board", "caption", "scene", "where it breaks", "breaks"];
+const BREAK_KEY = /^where (this |the |it )?(analogy )?breaks$|^breaks$/i;
+const SKIP_KEY = /^(mapping( table)?|next comics?.*|core truths|(the )?comic script|script|image prompts?|story check|style( line)?|tip|note|want more.*|see it drawn.*|here'?s .*)$/i;
+const URL_RE = /https?:\/\/|www\.|\b[\w-]+\.(com|io|org|net|app|dev|in)\//i;
+const INSTRUCTION_RE = /^(copy|paste|open|click|go to|visit|see it|reply|want more|tip)\b/i;
+const SPEECH_FORM = /^[^:"“]{1,40}?(\s*\((thinks|thinking|thought)\))?\s*:\s*["“].*\S.*["”]\s*$/i;
+
+/* Only the part between ===COMIC START=== and ===COMIC END=== (when the markers are there). */
+function sliceMarkers(text) {
+  const start = text.match(/^[ \t>]*=+\s*COMIC START\s*=+[ \t]*$/im);
+  if (!start) return text;
+  const rest = text.slice(start.index + start[0].length);
+  const end = rest.match(/^[ \t>]*=+\s*COMIC END\s*=+[ \t]*$/im);
+  return end ? rest.slice(0, end.index) : rest;
+}
+const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/* Keep only real speech: a known speaker, non-empty text, no URL. Max 2 bubbles; extras join the caption. */
+function cleanSpeech(c) {
+  const known = new Set(c.chars.map(x => x.name.toLowerCase()));
+  c.panels.forEach(p => p.show.forEach(s => known.add(s.trim().split(/\s+/)[0].toLowerCase())));
+  const scenes = c.panels.map(p => p.scene).join(" ").toLowerCase();
+  const panelsSpoken = {};
+  c.panels.forEach(p => new Set(p.speech.map(s => s.who.toLowerCase())).forEach(w => { panelsSpoken[w] = (panelsSpoken[w] || 0) + 1; }));
+  const isKnown = who => {
+    const w = who.toLowerCase().trim();
+    if (!w || w.split(/\s+/).length > 3 || hasEmoji(w)) return false;
+    return known.has(w) || [...known].some(k => w.startsWith(k + " ") || k.startsWith(w + " "))
+      || new RegExp("(^|[^\\p{L}])" + escRe(w) + "($|[^\\p{L}])", "u").test(scenes) || panelsSpoken[w] >= 2;
+  };
+  for (const p of c.panels) {
+    const good = p.speech.filter(s => s.text.replace(/["“”'\s]/g, "") && !URL_RE.test(s.text) && isKnown(s.who));
+    p.speech = good.slice(0, 2);
+    const extra = good.slice(2).map(s => `${s.who}: “${s.text}”`);
+    if (extra.length) p.caption = [p.caption, ...extra].filter(Boolean).join(" ");
+  }
+}
 
 function parse(text) {
   const c = { title: "", subtitle: "", setup: "", chars: [], panels: [], map: [], breaks: "" };
   let p = null, inBreaks = false;
-  const lines = text.replace(/\r/g, "").split("\n");
+  const lines = sliceMarkers(text).replace(/\r/g, "").split("\n");
   for (let raw of lines) {
-    let line = raw.replace(/^```.*$/, "").replace(/\*\*/g, "").replace(/^\s*(?:[-*•]|#{1,6})\s+/, "").trim();
+    let line = raw.replace(/^```.*$/, "").replace(/\*\*/g, "").replace(/^\s*>\s?/, "").replace(/^\s*(?:[-*•]|#{1,6})\s+/, "").trim();
     if (!line) continue;
+    if (URL_RE.test(line)) { inBreaks = false; continue; }                              // links/instructions are never comic content
+    if (INSTRUCTION_RE.test(line) && !SPEECH_FORM.test(line)) { inBreaks = false; continue; }
     if (/^\|/.test(line)) {
       const cells = line.split("|").slice(1, -1).map(x => x.trim());
       if (cells.length >= 2 && !/^:?-{2,}/.test(cells[0]) && !/^in the comic$/i.test(cells[0])) c.map.push([cells[0], cells[1]]);
@@ -238,6 +279,8 @@ function parse(text) {
     if (!m) continue;
     const key = m[1].trim(), lk = key.toLowerCase(), val = m[4].trim(), think = !!m[2];
     const unq = val.replace(/^["“]|["”]$/g, "");
+    if (BREAK_KEY.test(lk)) { if (unq) c.breaks = unq; else inBreaks = true; continue; }
+    if (SKIP_KEY.test(lk)) continue;
     if (!p) {
       if (lk === "comic" || lk === "title") c.title = unq;
       else if (lk === "subtitle") c.subtitle = unq;
@@ -257,6 +300,7 @@ function parse(text) {
     else if (lk === "where it breaks" || lk === "breaks") c.breaks = unq;
     else if (!KEYS.includes(lk)) p.speech.push({ who: key, text: unq, think });
   }
+  cleanSpeech(c);
   return c;
 }
 
@@ -425,12 +469,13 @@ function richText(s, x, y, fs, anchor, fill, hl) {
   }
   return out + "</text>";
 }
-function wrapEmo(s) { return esc(s).replace(/(\p{Extended_Pictographic}️?)/gu, '<tspan class="emo">$1</tspan>'); }
+function wrapEmo(s) { return esc(s).replace(/(\p{Extended_Pictographic}️?(?:‍\p{Extended_Pictographic}️?)*)/gu, '<tspan class="emo">$1</tspan>'); }
 function textW(s, fs) { let w = 0; for (const ch of s.replace(/~~/g, "")) w += /\p{Extended_Pictographic}/u.test(ch) ? fs * 1.15 : /[A-Z₹@MW]/.test(ch) ? fs * .66 : ch === " " ? fs * .32 : fs * .54; return w; }
 
 function signSVG(text, cx, cy, fs, stick) {
   const lines = text.split(/\s\/\s/);
   const w = Math.max(...lines.map(l => textW(l, fs))) + fs * 1.4, h = lines.length * fs * 1.25 + fs * .9;
+  cx = clamp(cx, w / 2 + 24, 1056 - w / 2);                           // keep the whole sign inside the panel
   let out = `<g>`;
   if (stick) out += `<rect x="${cx - 7}" y="${cy + h / 2 - 4}" width="14" height="${stick}" fill="#8b5a2b" stroke="${INK}" stroke-width="4"/>`;
   out += `<rect x="${cx - w / 2}" y="${cy - h / 2}" width="${w}" height="${h}" rx="10" fill="#fff3c4" stroke="${INK}" stroke-width="5"/>`;
@@ -616,9 +661,12 @@ function layoutPanel(c, p, sec, slots, charSlots, hasBoard, hasThings) {
   const topEl = sec.querySelector(".when, .tag");
   const topY = (topEl.offsetTop + topEl.offsetHeight) * U + 22;
   const bannerRight = (topEl.offsetLeft + topEl.offsetWidth) * U + 20;
-  const colsBottom = { L: topY, R: topY };
-  let lowest = topY;
   const bubbles = [...sec.querySelectorAll(".bubble, .think")];
+  const capEl = sec.querySelector(".caption");
+  const capTop = capEl ? capEl.offsetTop * U : 1080;
+  let colsBottom, lowest;
+  const place = () => {
+  colsBottom = { L: topY, R: topY }; lowest = topY;
   bubbles.forEach(b => {
     const sp = p.speech[+b.dataset.i];
     const slot = charSlots.find(s => s.s.ch === findChar(c, sp.who)) || null;
@@ -641,7 +689,14 @@ function layoutPanel(c, p, sec, slots, charSlots, hasBoard, hasThings) {
     b.style.setProperty("--tip", ((cx / 10.8 - left) / wPct * 100 > tail + 6 ? 90 : 20) + "%");
     b.style.setProperty("--dir", (cx / 10.8 - left) / wPct * 100 > tail ? 1 : -1);
   });
-  const cap = sec.querySelector(".caption");
+  };
+  // Normal size first; shrink (min 3.2cqw) until bubbles + tails leave room for the people above the caption.
+  for (let fs = 4.6; ; fs = Math.round((fs - .2) * 10) / 10) {
+    bubbles.forEach(b => { b.style.fontSize = fs + "cqw"; });
+    place();
+    if (!bubbles.length || lowest + 75 <= capTop - (hasBoard ? 460 : 300) || fs <= 3.2) break;
+  }
+  const cap = capEl;
   const feet = cap ? Math.min(930, cap.offsetTop * U - 18) : 930;
   const headTop = (bubbles.length ? lowest + 75 : topY + 20);
   const avail = Math.max(220, feet - headTop);
@@ -651,7 +706,7 @@ function layoutPanel(c, p, sec, slots, charSlots, hasBoard, hasThings) {
 
   let svg = placeSVG(p.place || p.scene || p.title, feet - 6);
   if (hasBoard) {
-    const by = Math.max(topY + 10, 170), bh = Math.min(feet - by - 40, 600);
+    const by = Math.max(topY + 10, 170, bubbles.length ? lowest + 80 : 0), bh = Math.max(220, Math.min(feet - by - 40, 600));
     svg = svg.replace(/<rect x="250" y="150"[^>]*\/>/, "") + boardSVG(p.board, 40, by, 670, bh);
   }
   for (const sl of charSlots) {

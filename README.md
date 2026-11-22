@@ -54,7 +54,7 @@ The AI writes:
 - ⚠️ "Where this analogy breaks": one honest line, so no wrong lessons
 
 ### 3. See it drawn (free)
-1. Copy the AI's script (everything from `COMIC:` to `Where it breaks:`).
+1. Copy the AI's script: the whole code block, from `===COMIC START===` to `===COMIC END===`.
 2. Open the **[Comic Viewer](https://techiesasikumar.github.io/concept-to-comics/viewer/)** and paste it in the box.
 3. Press **🎨 Draw my comic**.
 
