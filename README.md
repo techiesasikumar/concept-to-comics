@@ -4,11 +4,15 @@
 
 Ask "What is a JVM?", "What is inflation?" or "How do plants make food?" and get a short comic with characters, a story, and an analogy from *your* culture. Tea kadai, local train, lemonade stand or village market: you pick.
 
+## ▶️ Try it now in one click (no setup)
+
+1. **Gemini, ChatGPT, Claude or any AI chat:** copy [SKILL.md](SKILL.md) and paste it as your first message.
+2. **Ask any concept**, like *"What is inflation?"*
+3. **See it drawn:** paste the AI's script into the free [Comic Viewer](https://techiesasikumar.github.io/concept-to-comics/viewer/). No login.
+
+![Demo: paste a script into the Comic Viewer and get a comic](assets/demo.gif)
+
 > 🗓️ **Weekend Project #1** by [@techie_sasikumar](https://instagram.com/techie_sasikumar). A new AI build every weekend. Follow along!
-
-👉 **Try the free Comic Viewer:** https://techiesasikumar.github.io/concept-to-comics/viewer/ (press "Load an example")
-
-![Sample comic: Inflation, for kids in Tamil Nadu](examples/inflation-tamil-kids/preview.png)
 
 ---
 
@@ -138,4 +142,6 @@ MIT. Use it, remix it, teach with it.
 
 ---
 
-Made with ❤️ as Weekend Project #1 by **@techie_sasikumar**. Want to build your own AI app? Join **Build your first app with AI**. <!-- TODO: add link -->
+Made with ❤️ as Weekend Project #1 by [@techie_sasikumar](https://instagram.com/techie_sasikumar).
+
+🚀 **Build your first app with AI** (live session) - coming soon! DM 'BUILD' on Instagram [@techie_sasikumar](https://instagram.com/techie_sasikumar) to join the waitlist.

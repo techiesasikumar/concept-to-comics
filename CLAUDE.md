@@ -22,6 +22,7 @@ README.md           GitHub landing page, written for non-tech readers
 viewer/index.html   free comic viewer: paste a script, see it drawn (GitHub Pages)
 cultures/           community culture packs (_template.md + one file per culture)
 examples/           finished sample comics: script.md + comic.html + preview.png
+assets/             README demo.gif + social-preview.png (1280x640)
 LICENSE             MIT
 ```
 
@@ -32,11 +33,14 @@ Every comic covers WHAT, WHY and SO WHAT, has one idea only, and every row of it
 1. [x] Build `examples/inflation-tamil-kids/comic.html` from its script.md (follow SKILL.md Step 4B), screenshot it to preview.png
 2. [ ] Add examples: `jvm-college-students` (Tamil Nadu, Tanglish), `photosynthesis-kids-global` (English), `internet-elders-tamil-nadu`
 3. [ ] Test SKILL.md by pasting it into ChatGPT and Gemini; note any differences and tighten the wording
-4. [ ] Record demo GIF for README
-5. [ ] Add Build with me link + Instagram link in README
+4. [x] Record demo GIF for README (`assets/demo.gif`, made with Playwright + ffmpeg)
+5. [x] Add Build with me waitlist line + Instagram links in README (live session link still "coming soon")
 6. [x] `git init`, first commit, create public GitHub repo `concept-to-comics`, push
 7. [x] Build the free comic viewer (`viewer/index.html`) and point SKILL.md + README to it
 8. [x] After push: turn on GitHub Pages (main branch, root) and check the viewer URL works
+9. [x] Launch prep: "Try it now" section in README, social preview image (`assets/social-preview.png`, 1280x640)
+10. [ ] Create the Gemini Gem from SKILL.md and add its share link to the README "Try it now" section
+11. [ ] Upload `assets/social-preview.png` in GitHub repo Settings → General → Social preview (no API for this)
 
 ## Style
 - README: simple English, emojis OK, short sections, non-tech people should understand it.
